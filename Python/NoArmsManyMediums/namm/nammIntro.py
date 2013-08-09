@@ -16,6 +16,12 @@ No Arms Many Mediums Intro Animation
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Sprites and sound samples were borrowed from Chris Leathley's project,
+    Jumpman - Under Construction: 
+
+	http://members.iinet.net.au/~cleathley/jumpman/
+
 """
 
 

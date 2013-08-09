@@ -1,0 +1,4 @@
+    Sprites and sound samples were borrowed from Chris Leathley's project,
+    Jumpman - Under Construction: 
+
+	http://members.iinet.net.au/~cleathley/jumpman/
