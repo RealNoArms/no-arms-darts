@@ -1,8 +1,9 @@
 /*
   ShiftInAndOutBurger
   
-  Builds on the original Blink and Shiftout examples with 
-    patterns for 4 LEDs
+  Adds a shiftIn to the ShiftOutBlinkPlus to use the
+  parallel inputs of the 74HC589 parallel to serial
+  shift register instead of software inputs.
 
   This example code is in the public domain.
 */
