@@ -20,13 +20,13 @@ const int clockPin_out = 2;
 const int dataPin_out = 7;
 
 ////Pin connected to parallel load pin of 74HC589
-const int loadPin_in = 9;
+const int loadPin_in = 8;
 //Pin connected to latch clock pin of 74HC589
-const int latchPin_in = 10;
+const int latchPin_in = 9;
 //Pin connected to shift clock pin of 74HC589
-const int clockPin_in = 11;
+const int clockPin_in = 10;
 ////Pin connected to Data out (QW/QH?) of 74HC589
-const int dataPin_in = 12;
+const int dataPin_in = 11;
 
 
 //////////////////////////////////////////////////////////////
@@ -50,11 +50,11 @@ void setup() {
   digitalWrite(latchPin_in, LOW);
   digitalWrite(loadPin_in, HIGH);
   
-  /* DEBUG
+  /* DEBUG */
   Serial.begin(9600);
   Serial.println("start");
   Serial.println("");
-  */
+  /**/
 }
 
 // the loop routine runs over and over again forever:
@@ -70,14 +70,17 @@ void loop() {
   //to the shift registers
   digitalWrite(loadPin_in, LOW);
   
+  // move load pin from low to high to enable shifting
+  digitalWrite(loadPin_in, HIGH);
+  
   // shift the data in from the 74HC589 to a byte variable
   byte pattern = naShiftIn(dataPin_in, clockPin_in, MSBFIRST);
   
-  /* DEBUG
+  /* DEBUG */
   Serial.println("byte value:");
   Serial.println(pattern);
   Serial.println("");
-  */
+  /**/
   
   // send the byte out to the 74HC595
   displayPattern(pattern);
