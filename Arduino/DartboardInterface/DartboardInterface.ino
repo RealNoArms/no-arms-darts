@@ -26,6 +26,9 @@
   parallel-to-serial shift register.
 */
 
+#include "pitches.h"
+
+
 //////////////////////////////////////////////////////////////
 //  Defines
 //////////////////////////////////////////////////////////////
@@ -46,17 +49,28 @@
 // Pin connected to Data out (QW/QH?) of 74HC589
 #define DATA_PISO      8
 
+// Pin connected to speaker
+#define SPEAKER_PORT  12
+
+// set this to false if you don't have a speaker hooked up to digit pin 12 
+#define HAS_SPEAKER true
+
 // the column/pin on the board wired to the bulls-eye
 // for special handling
 #define BULL_BOARD_COLUMN_PIN   3
 
-// Interface commands -- in theory
-#define IFACE_HIT       'D'
-
+// Interface commands
+#define IFACE_HIT           'H'
+#define IFACE_CONNECT       'C'
+#define IFACE_DISCONNECT    'D'
+#define IFACE_PLAY          'P'
+#define IFACE_STOP          'X'
+#define IFACE_QUERY_STATE   'Q'
 
 //////////////////////////////////////////////////////////////
 //  Variable Declarations
 //////////////////////////////////////////////////////////////
+
 
 // data to send to shift register for each board row/pin
 byte shiftRows1[10] = {64,128,0,0,0,0,0,0,0,0};
@@ -66,8 +80,8 @@ byte shiftRows2[10] = {0,0,1,2,4,8,16,32,64,128};
 byte multipliers[4] = {0,1,2,3};
 
 // The wedges wired to rows/pins 0-9 of board
-// Thr third value is special case for bulls-eye multiplier
-int boardWedges[10][3] = {  {1,7,0}, 
+// The third value is special case for bulls-eye multiplier
+byte boardWedges[10][3] = {  {1,7,0}, 
                             {18,19,0}, 
                             {4,3,0}, 
                             {13,17,0}, 
@@ -81,10 +95,13 @@ int boardWedges[10][3] = {  {1,7,0},
     
 // The rings wired to columns/pins 1-7 of board.
 // The first value is which half of the board was hit
-//   and is used to pick the correct boardWedge value.
+//   and is used to pick the correct boardWedge value from the
+//   boardWedges array.
+// The second value is the multiplier ring that was hit, 1=single,
+//   2=double, 3=triple
 // Bulls-eye is special case where the value is determined here,
-//   and mulitplier is handled in rows/pins
-int boardRings[7][2] = {  {0,3},
+//   and mulitplier is handled in the boardWedges array.
+byte boardRings[7][2] = {  {0,3},
                           {0,2},
                           {0,1},
                           {2,25},
@@ -92,7 +109,8 @@ int boardRings[7][2] = {  {0,3},
                           {1,2},
                           {1,3}    };
 
-bool playing = false;
+char gameState;
+
 int rowHit = -1;
 int columnHit = -1;
 
@@ -102,7 +120,8 @@ int columnHit = -1;
 
 // the setup routine runs once when you press reset:
 void setup() {     
-
+  Serial.begin(9600);
+  
   //set pins to output to control the 74HC595
   pinMode(LATCH_SIPO, OUTPUT);
   pinMode(CLOCK_SIPO, OUTPUT);
@@ -121,28 +140,69 @@ void setup() {
   // set latch pin IN to low and load pin to high initially
   digitalWrite(LATCH_PISO, LOW);
   digitalWrite(SS_PL_PISO, HIGH);
- 
-  Serial.begin(9600);
-  playing = true;
+  
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo only
+  }
+  
+  gameState = IFACE_DISCONNECT;
 }
 
 // the loop routine runs over and over again forever and ever and ever:
 void loop() {
-  
-  if (playing)
-  {
-    for (int row=0; row < 10; row++)
-    {
+  if (gameState == IFACE_PLAY) {
+    // check for a hit
+    for (int row=0; row < 10; row++) {
        setSipoRow(row);
        processPisoColumns(row);
     }
   }
+  else {
+    delay(1000);
+  }
+}
+
+// automatically called between loops when serial data is available
+void serialEvent() {
+    switch (Serial.read()) {
+      case IFACE_QUERY_STATE:
+        Serial.print(gameState);
+        break;
+      case IFACE_CONNECT:
+        if (gameState == IFACE_DISCONNECT) {
+          gameState = IFACE_STOP;
+          Serial.write(IFACE_CONNECT);
+        }
+        break;
+      case IFACE_DISCONNECT:
+        if (gameState != IFACE_DISCONNECT) {
+          gameState = IFACE_DISCONNECT;
+          Serial.write(IFACE_DISCONNECT);
+        }
+        break;
+      case IFACE_PLAY:
+        if (gameState == IFACE_STOP) {
+          gameState = IFACE_PLAY;
+          Serial.write(IFACE_PLAY);
+          playCharge();
+        }
+        break;
+      case IFACE_STOP:
+        if (gameState == IFACE_PLAY) {
+          gameState = IFACE_STOP;
+          Serial.write(IFACE_STOP);
+        }
+        break;
+      default:
+        break;  
+    }
 }
 
 
 //////////////////////////////////////////////////////////////
 //  Helpers
 //////////////////////////////////////////////////////////////
+
 
 // sets the SIPO shift register to power the correct row
 void setSipoRow(int rowNumber) {
@@ -207,37 +267,57 @@ void loadPisoColumns() {
 // like send a message out to the serial port
 void registerHit(int row, int column) {
   
-  byte messageData[2];
+  byte multiplierCode;
+  byte wedgeValue;
   
   // bulls-eye is opposite the rest: the wedge is wired to the columns 
   // and the multipliers are wired to the rows
   if (column == BULL_BOARD_COLUMN_PIN) {
     // confusing, write it all out and it might make sense
-    messageData[0] = multipliers[boardWedges[row][boardRings[column][0]]];  // multiplierCode
-    messageData[1] = boardRings[column][1];  // wedgeValue
+    multiplierCode = multipliers[boardWedges[row][boardRings[column][0]]];
+    wedgeValue = boardRings[column][1];
   }
   else {
     // still confusing, write it all out and it might not make sense
-    messageData[0] = multipliers[boardRings[column][1]];  // multiplierCode
-    messageData[1] = boardWedges[row][boardRings[column][0]];  // wedgeValue
+    multiplierCode = multipliers[boardRings[column][1]];
+    wedgeValue = boardWedges[row][boardRings[column][0]];
   }
   
-  sendMessage(IFACE_HIT, messageData);
+  Serial.write(IFACE_HIT);
+  Serial.write(wedgeValue);
+  Serial.write(multiplierCode);
 }
 
-// sends message out through serial port
-// messages are a command char, colon, zero or more comma delimited data bytes, period
-void sendMessage(char command, const byte data[]) {
-  Serial.print(command);
-  Serial.print(':');
+void playCharge() {
+  int notes[] = {NOTE_G3, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_E4, NOTE_G4};
+  int durations[] = {8, 8, 8, 4, 8, 2};
+  int noteCount = 6;
   
-  for (int i=0; i < sizeof(data); i++) {
-    if (i > 0) {
-      Serial.print(',');
+  playMelody(notes, durations, noteCount);
+}
+
+// based on the arduino tones example, plays the given melody
+void playMelody(int melody[], int noteDurations[], int notecount) {
+  // don't even try to play nothin' if we don't got no speaker
+  if (HAS_SPEAKER) {
+    noTone(SPEAKER_PORT);
+    
+    // iterate over the notes of the melody:
+    for (int thisNote = 0; thisNote < notecount; thisNote++) {
+  
+      // to calculate the note duration, take one second 
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000/noteDurations[thisNote];
+      tone(SPEAKER_PORT, melody[thisNote], noteDuration);
+  
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+      
+      // stop the tone playing:
+      noTone(SPEAKER_PORT);
     }
-    Serial.print(data[i]);
   }
-  
-  Serial.println('.');
 }
-
