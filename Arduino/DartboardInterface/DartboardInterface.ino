@@ -71,6 +71,15 @@
 //  Variable Declarations
 //////////////////////////////////////////////////////////////
 
+// status light shift register values (logical and with shiftRows1)
+byte connectedRed = 1;
+byte connectedYellow = 2;
+byte connectedGreen = 4;
+
+
+byte playingRed = 8;
+byte playingYellow = 16;
+byte playingGreen = 32;
 
 // data to send to shift register for each board row/pin
 byte shiftRows1[10] = {64,128,0,0,0,0,0,0,0,0};
@@ -158,6 +167,7 @@ void loop() {
     }
   }
   else {
+    setStatusLEDs(gameState);
     delay(1000);
   }
 }
@@ -170,18 +180,24 @@ void serialEvent() {
         break;
       case IFACE_CONNECT:
         if (gameState == IFACE_DISCONNECT) {
+          setStatusLEDs(IFACE_CONNECT);  // sets connected LED to yellow for a sec
+          delay(1000);
           gameState = IFACE_STOP;
           Serial.write(IFACE_CONNECT);
         }
         break;
       case IFACE_DISCONNECT:
         if (gameState != IFACE_DISCONNECT) {
+          setStatusLEDs(IFACE_CONNECT);  // sets connected LED to yellow for a sec
+          delay(1000);
           gameState = IFACE_DISCONNECT;
           Serial.write(IFACE_DISCONNECT);
         }
         break;
       case IFACE_PLAY:
         if (gameState == IFACE_STOP) {
+          setStatusLEDs(IFACE_HIT);  // sets play LED to yellow for a sec
+          delay(1000);
           gameState = IFACE_PLAY;
           Serial.write(IFACE_PLAY);
           playCharge();
@@ -189,6 +205,8 @@ void serialEvent() {
         break;
       case IFACE_STOP:
         if (gameState == IFACE_PLAY) {
+          setStatusLEDs(IFACE_HIT);  // sets play LED to yellow for a sec
+          delay(1000);
           gameState = IFACE_STOP;
           Serial.write(IFACE_STOP);
         }
@@ -203,64 +221,109 @@ void serialEvent() {
 //  Helpers
 //////////////////////////////////////////////////////////////
 
+void setStatusLEDs(byte state) {
+  boolean setLEDs = false;
+  byte connectedStatus = 0;
+  byte playingStatus = 0;
+  
+  switch (state) {
+    case IFACE_HIT:
+      connectedStatus = connectedGreen;
+      playingStatus = playingYellow;
+      setLEDs = true;
+      break;
+    case IFACE_CONNECT:
+      connectedStatus = connectedYellow;
+      playingStatus = playingRed;
+      setLEDs = true;
+      break;
+    case IFACE_DISCONNECT:
+      connectedStatus = connectedRed;
+      playingStatus = playingRed;
+      setLEDs = true;
+      break;
+    case IFACE_PLAY:
+      setLEDs = false;
+      break;
+    case IFACE_STOP:
+      connectedStatus = connectedGreen;
+      playingStatus = playingRed;
+      setLEDs = true;
+      break;
+    default:
+      setLEDs = false;
+  }
+  
+  if (setLEDs) {
+    // take the shift out latchPin low to shift it out
+    digitalWrite(LATCH_SIPO, LOW);
+    
+    // shift out the bits (assume we're connected and playing if we're doing this at all):
+    shiftOut(DATA_SIPO, CLOCK_SIPO, MSBFIRST, connectedStatus + playingStatus);
+    shiftOut(DATA_SIPO, CLOCK_SIPO, MSBFIRST, 0);
+    
+    //take the shift out latch pin high so the voltage is sent
+    // to the next row (or none if looking at the first 2 rows):
+    digitalWrite(LATCH_SIPO, HIGH);
+  }
+}
 
 // sets the SIPO shift register to power the correct row
 void setSipoRow(int rowNumber) {
-      // take the shift out latchPin low to shift it out
-      digitalWrite(LATCH_SIPO, LOW);
-      
-      // shift out the bits:
-      shiftOut(DATA_SIPO, CLOCK_SIPO, MSBFIRST, shiftRows1[rowNumber]);
-      shiftOut(DATA_SIPO, CLOCK_SIPO, MSBFIRST, shiftRows2[rowNumber]);
-      
-      //take the shift out latch pin high so the voltage is sent
-      // to the next row (or none if looking at the first 2 rows):
-      digitalWrite(LATCH_SIPO, HIGH);
+  // take the shift out latchPin low to shift it out
+  digitalWrite(LATCH_SIPO, LOW);
+  
+  // shift out the bits (assume we're connected and playing if we're doing this at all):
+  shiftOut(DATA_SIPO, CLOCK_SIPO, MSBFIRST, shiftRows1[rowNumber] + connectedGreen + playingGreen);
+  shiftOut(DATA_SIPO, CLOCK_SIPO, MSBFIRST, shiftRows2[rowNumber]);
+  
+  //take the shift out latch pin high so the voltage is sent
+  // to the next row (or none if looking at the first 2 rows):
+  digitalWrite(LATCH_SIPO, HIGH);
 }
 
 // check each column in the given row for a hit
 void processPisoColumns(int row) {
       
-      loadPisoColumns();
-       
-      // check each column of the PISO for a hit
-      for (int column = 0; column < 8; column++)
-      {        
-        if (digitalRead(DATA_PISO) == HIGH)
-        {          
-          // set the hit coords to watch for the unpressing
-          rowHit = row;
-          columnHit = column;
-        }
-        else if (row == rowHit && column == columnHit)
-        {
-          // button has been unpressed, register the hit
-          rowHit = -1;
-          columnHit = -1;
-          registerHit(row,column);
-        }
-        
-        // shift
-        digitalWrite(CLOCK_PISO, HIGH);
-        digitalWrite(CLOCK_PISO, LOW);
-      }
+  loadPisoColumns();
+   
+  // check each column of the PISO for a hit
+  for (int column = 0; column < 8; column++)
+  {        
+    if (digitalRead(DATA_PISO) == HIGH)
+    {          
+      // set the hit coords to watch for the unpressing
+      rowHit = row;
+      columnHit = column;
+    }
+    else if (row == rowHit && column == columnHit)
+    {
+      // button has been unpressed, register the hit
+      rowHit = -1;
+      columnHit = -1;
+      registerHit(row,column);
+    }
+    
+    // shift
+    digitalWrite(CLOCK_PISO, HIGH);
+    digitalWrite(CLOCK_PISO, LOW);
+  }
 }
 
 // loads the parallel input values into the PISO shift register
 void loadPisoColumns() {
-      
-      // move PISO latch from LOW to HIGH to move parallel inputs to data latch
-      digitalWrite(LATCH_PISO, HIGH);
-      
-      // reset the PISO latch
-      digitalWrite(LATCH_PISO, LOW);
-      
-      // move the PISO SS-PL pin from high to low load the data from the data latch 
-      // to the shift registers
-      digitalWrite(SS_PL_PISO, LOW);
+  // move PISO latch from LOW to HIGH to move parallel inputs to data latch
+  digitalWrite(LATCH_PISO, HIGH);
   
-      // move PISO SS-PL pin from low to high to enable shifting
-      digitalWrite(SS_PL_PISO, HIGH);
+  // reset the PISO latch
+  digitalWrite(LATCH_PISO, LOW);
+  
+  // move the PISO SS-PL pin from high to low load the data from the data latch 
+  // to the shift registers
+  digitalWrite(SS_PL_PISO, LOW);
+
+  // move PISO SS-PL pin from low to high to enable shifting
+  digitalWrite(SS_PL_PISO, HIGH);
 }
 
 // does whatever needs to be done when a wedge is hit by a dart
