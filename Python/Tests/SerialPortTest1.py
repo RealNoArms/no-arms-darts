@@ -20,11 +20,13 @@ requestCount = 0
 maxRequests = 5
 yorn = ''
 
-ser = serial.Serial("COM5", 9600)
+ser = serial.Serial("COM3", 9600)
 # *nix: ser = serial.Serial('/dev/ttyblah1', 9600)  or whetever
 # TODO: look at scan example to try to automagically find the right port?
 
 ser.timeout = 5
+
+print "Hit double bull to exit."
 
 while not connected:
     if requestCount >= maxRequests:
@@ -89,6 +91,30 @@ while playing:
                 hitMessage.append("{0:d}".format(wedge))
 
             print ''.join(hitMessage)
+
+            if wedge == 25 and multiplier == 2:
+                playing = False
+                
+                print "Stopping game..."
+                ser.write('X')
+                ser.read()
+                
+                ser.write('Q')
+                while (ser.read() != 'X'):
+                    ser.write('Q')
+
+                print "Game stopped!"
+
+                print "Disconnecting dartboard..."
+                ser.write('D')
+                ser.read()
+                
+                ser.write('Q')
+                while (ser.read() != 'D'):
+                    ser.write('Q')
+
+                print "Dartboard disconnected!"
+                
 
 
 

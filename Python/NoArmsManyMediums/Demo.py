@@ -19,8 +19,8 @@ No Arms Many Mediums Demo
 """
 
 
-import namm.nammIntro
+import namm.intro.nammIntro
 
-intro = namm.nammIntro.NammIntro()
+intro = namm.intro.nammIntro.NammIntro()
 intro.Run()
 
