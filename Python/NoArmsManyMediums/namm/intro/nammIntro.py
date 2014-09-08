@@ -29,14 +29,17 @@ import pygame, sys, os
 from pygame.locals import *
 from namm.common.utilities import *
 
-pygame.mixer.pre_init(44100, -16, 2, 2048)
-pygame.init()
-screen = pygame.display.set_mode((640,480))
+#pygame.mixer.pre_init(44100, -16, 2, 2048)
+#pygame.init()
+#screen = pygame.display.set_mode((640,480))
 
 import nammIntroSprites
 
 class NammIntro:
-    def __init__(self):
+    def __init__(self, screen):
+        self.main = screen
+        self.screen = pygame.Surface((640, 480),0,32);
+        
         self.RED = (128, 64, 64)
         self.CYAN = (110, 183, 193)
         self.PURPLE = (127, 59, 166)
@@ -50,7 +53,7 @@ class NammIntro:
         self.colorCycleIndex = 0
         self.noArmsColorCycles = 128
 
-        self.backfill = pygame.Surface(screen.get_size())
+        self.backfill = pygame.Surface(self.screen.get_size())
         self.backfill.fill((0,0,0))
         self.backfillRect = self.backfill.get_rect()
 
@@ -97,6 +100,7 @@ class NammIntro:
         self.colorCycleIndex = 0
         self.gameSpeed = 16
         self.delay = 0
+        self.running = True
 
     def Run(self):
 
@@ -108,25 +112,24 @@ class NammIntro:
 	self.pythonPower = nammIntroSprites.OpeningObjects((320, 285), 'python-powered-h-140x182.png', 0)
 	self.pygamePower = nammIntroSprites.OpeningObjects((320, 385), 'pygame_logo.png', 1)
 
-	self.openingObjectsGroup.clear(screen, self.backfill)
+	self.openingObjectsGroup.clear(self.screen, self.backfill)
 	self.openingObjectsGroup.update()
-	self.openingObjectsGroup.draw(screen)
+	self.openingObjectsGroup.draw(self.screen)
+
+	pygame.transform.scale(self.screen, self.main.get_size(), self.main)
+	#self.main.blit(self.screen, (0,0))
 
 	pygame.display.flip()
 
-        while True:
+        while self.running:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == KEYDOWN and event.key == K_s:
-                    self.startVid = 1
-                        
-                """
-                elif event.type == MOUSEBUTTONDOWN:
-                    if introStep == 3:
-                        jumpman.move_to_x(pygame.mouse.get_pos()[0], 16)
-                """
+                    self.introStep= 15
+                elif event.type == KEYDOWN:
+                    if event.key == K_s:
+                        self.startVid = 1
+                    elif event.key in (K_q, K_ESCAPE):
+                        self.introStep= 15
             
             if self.introStep == 0 and self.startVid:
                 # Pause Before Fading In
@@ -136,16 +139,25 @@ class NammIntro:
 
             elif self.introStep == 1:
                 # Fade In Screen
+                pygame.transform.scale(self.screen, (640,480))
                 self.background.set_alpha(self.fadeInAlpha)
-                screen.blit(self.backfill, self.backfillRect)
-                self.fadeInAlpha += 1
+                self.screen.blit(self.backfill, self.backfillRect)
+                
+                pygame.transform.scale(self.screen, self.main.get_size(), self.main)
+                #self.main.blit(self.screen, (0,0))
+
+                self.fadeInAlpha += 3
 
                 if self.fadeInAlpha > 255:
                     self.introStep += 1
                 else:
-                    pygame.time.delay(10)
+                    pygame.time.delay(5)
 
-                screen.blit(self.background, self.backgroundRect)
+                pygame.transform.scale(self.screen, (640,480))
+                self.screen.blit(self.background, self.backgroundRect)
+                
+                pygame.transform.scale(self.screen, self.main.get_size(), self.main)
+                #self.main.blit(self.screen, (0,0))
                 
             elif self.introStep == 2:
                 # Pause Before Jumpman Appears
@@ -352,22 +364,24 @@ class NammIntro:
                         self.introStep += 1
                     
                 elif self.introStep == 15:
-                    pygame.quit()
-                    sys.exit()
+                    self.running = False
                         
-                        
-                self.lettersGroup.clear(screen, self.background)
-                self.jumpmanGroup.clear(screen, self.background)
-                self.laddersGroup.clear(screen, self.background)
+                pygame.transform.scale(self.screen, (640,480))
+                
+                self.lettersGroup.clear(self.screen, self.background)
+                self.jumpmanGroup.clear(self.screen, self.background)
+                self.laddersGroup.clear(self.screen, self.background)
                 
                 self.lettersGroup.update()
                 self.jumpmanGroup.update()
                 self.laddersGroup.update()
                 
-                self.lettersGroup.draw(screen)
-                self.jumpmanGroup.draw(screen)        
-                self.laddersGroup.draw(screen)
+                self.lettersGroup.draw(self.screen)
+                self.jumpmanGroup.draw(self.screen)        
+                self.laddersGroup.draw(self.screen)
                 
+            pygame.transform.scale(self.screen, self.main.get_size(), self.main)
+            #self.main.blit(self.screen, (0,0))
             pygame.display.flip()
             pygame.time.delay(self.delay)
 

@@ -1,9 +1,8 @@
 """
-/namm/__init__.py
 
-The No Arms Many Mediums Package
+No Arms Darts
 
-    Copyright (C) 2013  Tim Kracht <timkracht4@gmail.com>
+    Copyright (C) 2014  Tim Kracht <timkracht4@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,5 +18,22 @@ The No Arms Many Mediums Package
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import sys, pygame
+from pygame.locals import *
 
-__all__ = ["NoArmsDarts"]
+pygame.mixer.pre_init(44100, -16, 2, 2048)
+pygame.init()
+displayInfo = pygame.display.Info()
+
+
+try:
+    screen = pygame.display.set_mode((displayInfo.current_w, displayInfo.current_h), pygame.FULLSCREEN | pygame.HWSURFACE, 32)
+    from namm import *
+    dartsGame = NoArmsDarts.NoArmsDarts(screen)
+    #print "running darts"
+    dartsGame.Run()
+except (Exception), e:
+    print e
+finally:
+    pygame.quit()
+    sys.exit()

@@ -1,7 +1,7 @@
 """
-/namm/__init__.py
+/namm/common/__init__.py
 
-The No Arms Many Mediums Package
+The No Arms Many Mediums Common Package
 
     Copyright (C) 2013  Tim Kracht <timkracht4@gmail.com>
 
@@ -20,4 +20,4 @@ The No Arms Many Mediums Package
 """
 
 
-__all__ = ["NoArmsDarts"]
+__all__ = ["utilities","menu"]

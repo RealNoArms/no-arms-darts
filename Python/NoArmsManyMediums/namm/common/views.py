@@ -1,7 +1,7 @@
 """
-/namm/__init__.py
 
-The No Arms Many Mediums Package
+The No Arms Many Mediums Common Views module
+
 
     Copyright (C) 2013  Tim Kracht <timkracht4@gmail.com>
 
@@ -19,5 +19,7 @@ The No Arms Many Mediums Package
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
-__all__ = ["NoArmsDarts"]
+""" The View base class """
+class View:
+    def __init__(self):
+        self.name = "Namm View"

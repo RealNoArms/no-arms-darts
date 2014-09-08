@@ -1,9 +1,9 @@
 """
-/namm/__init__.py
+/namm/Games/__init__.py
 
-The No Arms Many Mediums Package
+The No Arms Many Mediums Game Library
 
-    Copyright (C) 2013  Tim Kracht <timkracht4@gmail.com>
+    Copyright (C) 2013, 2014  Tim Kracht <timkracht4@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,4 +20,13 @@ The No Arms Many Mediums Package
 """
 
 
-__all__ = ["NoArmsDarts"]
+__all__ = ["AroundTheWorld"]
+
+def get_game_list():
+    return ["Around The World"]
+
+def get_game(game_name):
+    if game_name == "Around The World":
+        return AroundTheWorld.AroundTheWorld()
+    else:
+        return None
