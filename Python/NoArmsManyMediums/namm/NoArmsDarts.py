@@ -60,7 +60,7 @@ class NoArmsDarts():
 
             self.menu_bg_image = pygame.image.load(os.path.join('namm', 'images', 'naDarts', 'images', 'hireswallpaperboardgreenpredator.png')).convert()
             self.menu_bg_image = pygame.transform.scale(self.menu_bg_image, (self.display_screen.get_rect().width, self.display_screen.get_rect().height))
-            self.menu_font = os.path.join('namm', 'fonts','FAKERECE.ttf')
+            self.menu_font = os.path.join('namm', 'fonts','FAKERECE.TTF')
             #self.menu_font = os.path.join('namm', 'fonts','256BYTES.ttf')
 
             
