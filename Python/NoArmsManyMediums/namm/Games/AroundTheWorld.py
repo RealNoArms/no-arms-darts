@@ -87,7 +87,7 @@ class AroundTheWorld(Darts.Game):
     def setPlayerTargetRingValues(self, player):
         if (self._variation == ATW_VARIATION_DUBS) or ((self._variation == ATW_VARIATION_DUBOUT) and player.targetWedgeValue == 20):
             player.targetRingValues = [2]
-        elif (self._variation == ATW_VARIATION_SHANG):
+        elif self._variation == ATW_VARIATION_SHANG:
             player.targetRingValues = [1,2,3]
         else:
             player.targetRingValues = [1,2,3]

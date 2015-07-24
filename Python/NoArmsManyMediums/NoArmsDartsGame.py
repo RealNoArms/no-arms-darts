@@ -29,7 +29,7 @@ displayInfo = pygame.display.Info()
 try:
     screen = pygame.display.set_mode((displayInfo.current_w, displayInfo.current_h), pygame.FULLSCREEN | pygame.HWSURFACE, 32)
     from namm import *
-    dartsGame = NoArmsDarts.NoArmsDarts(screen)
+    dartsGame = NoArmsDarts.NoArmsDarts(screen, "Debug")
     #print "running darts"
     dartsGame.Run()
 except (Exception), e:

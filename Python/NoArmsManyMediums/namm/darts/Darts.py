@@ -20,61 +20,61 @@ Classes in the Base Darts model
 """
 
 # package-level stuff
-WEDGE_NAMES = {"1":"1"
-               ,"2":"2"
-               ,"3":"3"
-               ,"4":"4"
-               ,"5":"5"
-               ,"6":"6"
-               ,"7":"7"
-               ,"8":"8"
-               ,"9":"9"
-               ,"10":"10"
-               ,"11":"11"
-               ,"12":"12"
-               ,"13":"13"
-               ,"14":"14"
-               ,"15":"15"
-               ,"16":"16"
-               ,"17":"17"
-               ,"18":"18"
-               ,"19":"19"
-               ,"20":"20"
-               ,"25":"Bullseye"}
+WEDGE_NAMES = {"1": "1",
+               "2": "2",
+               "3": "3",
+               "4": "4",
+               "5": "5",
+               "6": "6",
+               "7": "7",
+               "8": "8",
+               "9": "9",
+               "10": "10",
+               "11": "11",
+               "12": "12",
+               "13": "13",
+               "14": "14",
+               "15": "15",
+               "16": "16",
+               "17": "17",
+               "18": "18",
+               "19": "19",
+               "20": "20",
+               "25": "Bullseye"}
 
-WEDGE_VALUES = {"1":1
-               ,"2":2
-               ,"3":3
-               ,"4":4
-               ,"5":5
-               ,"6":6
-               ,"7":7
-               ,"8":8
-               ,"9":9
-               ,"10":10
-               ,"11":11
-               ,"12":12
-               ,"13":13
-               ,"14":14
-               ,"15":15
-               ,"16":16
-               ,"17":17
-               ,"18":18
-               ,"19":19
-               ,"20":20
-               ,"25":25}
+WEDGE_VALUES = {"1": 1,
+                "2": 2,
+                "3": 3,
+                "4": 4,
+                "5": 5,
+                "6": 6,
+                "7": 7,
+                "8": 8,
+                "9": 9,
+                "10": 10,
+                "11": 11,
+                "12": 12,
+                "13": 13,
+                "14": 14,
+                "15": 15,
+                "16": 16,
+                "17": 17,
+                "18": 18,
+                "19": 19,
+                "20": 20,
+                "25": 25}
 
-RING_NAMES = {"S":"Single"
-              ,"I":"Inner Single"
-              ,"O":"Outer Single"
-              ,"D":"Double"
-              ,"T":"Triple"}
+RING_NAMES = {"S": "Single",
+              "I": "Inner Single",
+              "O": "Outer Single",
+              "D": "Double",
+              "T": "Triple"}
 
-RING_VALUES = {"S":1
-              ,"I":1
-              ,"O":1
-              ,"D":2
-              ,"T":3}
+RING_VALUES = {"S": 1,
+               "I": 1,
+               "O": 1,
+               "D": 2,
+               "T": 3}
 
 # States
 STATE_PLAYING = "Playing"
@@ -92,34 +92,40 @@ INSTR_VARIATIONS = "Variations"
 # Standard Variation
 GAME_VARIATION_STD = "Standard"
 
-def getWedgeName(code):
+
+def get_wedge_name(code):
     if code and code in WEDGE_NAMES:
         return WEDGE_NAMES[code]
     else:
         raise ParameterError("Invalid wedge!", code)
 
-def getWedgeValue(code):
+
+def get_wedge_value(code):
     if code and code in WEDGE_VALUES:
         return WEDGE_VALUES[code]
     else:
         raise ParameterError("Invalid wedge!", code)
 
-def getRingName(code):
+
+def get_ring_name(code):
     if code and code in RING_NAMES:
         return RING_NAMES[code]
     else:
         raise ParameterError("Invalid ring!", code)
 
-def getRingValue(code):
+
+def get_ring_value(code):
     if code and code in RING_VALUES:
         return RING_VALUES[code]
     else:
         raise ParameterError("Invalid ring!", code)
 
-def isValidWedge(code):
+
+def is_valid_wedge(code):
     return code in WEDGE_NAMES
 
-def isValidRing(code):
+
+def is_valid_ring(code):
     return code in RING_NAMES
 
 
@@ -133,6 +139,24 @@ class Game(object):
         self._variationOptions = []
         self._variationOptions.append(GAME_VARIATION_STD)
         self._settingOptions = []
+        self._state = None
+        self.winner = None
+
+        self._minPlayers = 1
+        self._maxPlayers = 4
+        # self.numPlayers = 1
+        self._throwsPerTurn = 3
+        self._roundsPerLeg = None
+        self._legsPerSet = 1
+        self._setsPerMatch = 1
+
+        self._players = None
+        self._currentPlayerName = None
+        self._currentThrow = 0
+        self._currentRound= 0
+        self._currentLeg = 0
+        self._currentSet = 0
+
         self.reset()
         
     def __str__(self):
@@ -141,7 +165,7 @@ class Game(object):
     def start(self):
         if self._state and self._state.name == STATE_STOPPED:
             self.winner = None
-            self.zeroScores()
+            self.zero_scores()
             self._state = GameState(STATE_PLAYING)
         else:
             raise GameStateError("Cannot start, game state is not stopped!", self._state)
@@ -149,24 +173,23 @@ class Game(object):
     def stop(self):
         self._state = GameState(STATE_STOPPED)
 
-    def scorePlayerThrow(self, playerName, throw):
+    def score_player_throw(self, player_name, throw):
         if self._state and self._state.name == STATE_PLAYING:
-            if playerName in self._players:
-                self._players[playerName].append(throw)
+            if player_name in self._players:
+                self._players[player_name].append(throw)
             else:
-                raise ParameterError("Cannot score throw, unknown player name!", playerName)
+                raise ParameterError("Cannot score throw, unknown player name!", player_name)
         else:
             raise GameStateError("Cannot score throw, game state is not playing!", self._state)
 
-    def zeroScores(self):
+    def zero_scores(self):
         for player in self.players:
             player.points = 0
     
     def reset(self):
-
         self._minPlayers = 1
         self._maxPlayers = 4
-        #self.numPlayers = 1
+        # self.numPlayers = 1
         self._throwsPerTurn = 3
         self._roundsPerLeg = None
         self._legsPerSet = 1
@@ -274,24 +297,24 @@ class Throw(object):
 
     @property
     def wedgeName(self):
-        return getWedgeName(self.wedge)
+        return get_wedge_name(self.wedge)
 
     @property
     def ringName(self):
-        return getRingName(self.ring)
+        return get_ring_name(self.ring)
     
     @property
     def wedgeValue(self):
-        return getWedgeValue(self.wedge)
+        return get_wedge_value(self.wedge)
 
     @property
     def ringValue(self):
-        return getRingValue(self.ring)
+        return get_ring_value(self.ring)
 
     @property
     def points(self):
         if self.wedge and self.ring:
-            return (getRingValue(self.ring) * getWedgeValue(self.wedge))
+            return (get_ring_value(self.ring) * get_wedge_value(self.wedge))
         else:
             raise Error("Incomplete throw, missing wedge or ring",(self.ring, self.wedge))
     
@@ -302,7 +325,7 @@ class Throw(object):
     @wedge.setter
     def wedge(self, value):
         self._wedge = None
-        if isValidWedge(value):
+        if is_valid_wedge(value):
             self._wedge = value
         else:
             raise ParameterError("Invalid Wedge value!", value)
@@ -314,7 +337,7 @@ class Throw(object):
     @ring.setter
     def ring(self, value):
         self._ring = None
-        if isValidRing(value):
+        if is_valid_ring(value):
             self._ring = value
         else:
             raise ParameterError("Invalid Ring value!", value)
