@@ -47,8 +47,10 @@ STCMD_DISCONNECT = ('D', 'Disconnected')
 STCMD_QUERY = ('Q', 'Querying')
 STCMD_ACKNOWLEDGE = ('A', 'Acknowledging')
 
+LOST_CONNECTION = 'L'
 
 # USB Dartboarduino
+
 
 class Dartboarduino(object):
 
@@ -161,7 +163,12 @@ class Dartboarduino(object):
     def flush(self):
         self._logger.log("Debug", "Entering flush() procedure")
         if self._usb is not None:
-            self._usb.flushInput()
+            try:
+                self._usb.flushInput()
+            except serial.SerialException, e:
+                self._logger.log("Error", "Could not flush input")
+                self._logger.log("Error", e.message)
+                raise
         else:
             self._logger.log("Debug", "Not connected to serial port, nothing to flush")
 
@@ -169,25 +176,37 @@ class Dartboarduino(object):
         self._logger.log("Debug", "Entering get_hit() procedure")
         result = None
         if self._usb is not None and self._currentState == STCMD_PLAY[0]:
-            if self._usb.inWaiting() > 0 and self._usb.read() == STCMD_HIT[0]:
-                w = self._get_serial_response()
-                m = self._get_serial_response()
+            try:
+                read_buffer = self._usb.read()
+                if self._usb.inWaiting() > 0 and read_buffer == STCMD_HIT[0]:
+                    w = self._get_serial_response()
+                    m = self._get_serial_response()
 
-                if w and m:
-                    try:
-                        wedge = unpack('b' * len(w), w)[0]
-                        multiplier = unpack('b' * len(m), m)[0]
-                        result = (multiplier, wedge)
-                    except Exception:
-                        self._logger.log("Error", "get_hit : Could not unpack the response.  Probably missed a hit.")
+                    if w is not None and m is not None:
+                        try:
+                            wedge = unpack('b' * len(w), w)[0]
+                            multiplier = unpack('b' * len(m), m)[0]
+                            result = (multiplier, wedge)
+                        except Exception, e:
+                            self._logger.log("Error",
+                                             "get_hit : Could not unpack the response.  Probably missed a hit.")
+                            self._logger.log("Error", e.message)
+                            self._logger.log("Info", "get_hit : w: " + str(w))
+                            self._logger.log("Info", "get_hit : m: " + str(m))
+                    else:
+                        self._logger.log("Error",
+                                         "get_hit : Wedge and/or Multiplier not received.  Probably missed a hit.")
                         self._logger.log("Info", "get_hit : w: " + str(w))
                         self._logger.log("Info", "get_hit : m: " + str(m))
                 else:
-                    self._logger.log("Error", "get_hit : Wedge and/or Multiplier not received.  Probably missed a hit.")
-                    self._logger.log("Info", "get_hit : w: " + str(w))
-                    self._logger.log("Info", "get_hit : m: " + str(m))
-            else:
-                self._logger.log("Debug", "No '" + STCMD_HIT[0] + "' messages received")
+                    self._logger.log("Debug", "No '" + STCMD_HIT[0] + "' messages received")
+            except serial.SerialException, e:
+                self._logger.log("Error", "get_hit : Could not get the hit from the port.")
+                self._logger.log("Error", e.message)
+                self._logger.log("Warn", "Lost connection to the port!")
+                self._usb = None
+                self._currentState = None
+                result = (LOST_CONNECTION, 0)
         else:
             self._logger.log("Warn", "get_hit : Board state is not '" + STCMD_PLAY[1] + "', so port was not read.")
             # self._logger.log("Info", "get_hit : Current board state: " + str(self.state))
@@ -201,7 +220,7 @@ class Dartboarduino(object):
             if self._usb is None:
                 try:
                     self._usb = serial.Serial(self._port, self._baudRate)
-                except Exception, e:
+                except serial.SerialException, e:
                     self._logger.log("Error", str(e))
                     self._usb = None
                 else:
@@ -222,7 +241,7 @@ class Dartboarduino(object):
             if self._usb is not None:
                 self._logger.log("Debug", "Closing serial port")
                 self._usb.close()
-        except Exception, e:
+        except serial.SerialException, e:
             self._logger.log("Error", str(e))
         self._usb = None
         self._port = self._find_serial_port()
@@ -300,14 +319,14 @@ class Dartboarduino(object):
                         self._usb = serial.Serial(port, self._baudRate)
                         self._logger.log("Debug", str(self._usb.getSettingsDict()))
                     except Exception, e:
-                        self._logger.log("Info",str(e))
+                        self._logger.log("Info", str(e))
                         self._logger.log("Debug", "Failed to open " + port)
                     else:
                         self._logger.log("Debug", "Opened " + port)
                         self._usb.timeout = self._timeout
                         self._logger.log("Debug", "Asking the port if it is a Dartboarduino")
-                        serialRead = self._get_serial_response(STCMD_QUERY[0])
-                        if serialRead in self._statuses:
+                        serial_read = self._get_serial_response(STCMD_QUERY[0])
+                        if serial_read in self._statuses:
                             self._logger.log("Info", "_find_serial_port : Dartboarduino discovered on " + port)
                             result = port
                         else:
@@ -343,8 +362,8 @@ class Dartboarduino(object):
                             self._logger.log("Debug", "Flushing port and sending command")
                             self._usb.flushInput()
                             self._usb.write(command)
-                        except Exception, e:
-                            self._logger.log("Error",str(e))
+                        except serial.SerialException, e:
+                            self._logger.log("Error", str(e.message))
                             self._logger.log("Debug", "Failed to flush and write to port on attempt #" + str(requests))
                             raise
                     self._logger.log("Debug", "Reading port")
@@ -352,9 +371,14 @@ class Dartboarduino(object):
                     if len(response) == 0:
                         self._logger.log("Debug", "Received data with a length of 0 on attempt #" + str(requests))
                         response = None
-                except Exception, e:
-                    self._logger.log("Error",str(e))
+                except serial.SerialException, e:
+                    self._logger.log("Error", str(e))
                     self._logger.log("Debug", "Failed to get a response from the port")
+            if response is None:
+                self._logger.log("Warn", "Lost connection to the port!")
+                self._usb = None
+                self._currentState = None
+                response = LOST_CONNECTION
         else:
             self._logger.log("Warn", "_get_serial_response : Port not open, so no request was sent")
         self._logger.log("Debug", "_get_serial_response() returning: " + str(response))
