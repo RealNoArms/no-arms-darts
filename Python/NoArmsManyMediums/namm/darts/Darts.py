@@ -94,28 +94,28 @@ GAME_VARIATION_STD = "Standard"
 
 
 def get_wedge_name(code):
-    if code and code in WEDGE_NAMES:
+    if code is not None and code in WEDGE_NAMES:
         return WEDGE_NAMES[code]
     else:
         raise ParameterError("Invalid wedge!", code)
 
 
 def get_wedge_value(code):
-    if code and code in WEDGE_VALUES:
+    if code is not None and code in WEDGE_VALUES:
         return WEDGE_VALUES[code]
     else:
         raise ParameterError("Invalid wedge!", code)
 
 
 def get_ring_name(code):
-    if code and code in RING_NAMES:
+    if code is not None and code in RING_NAMES:
         return RING_NAMES[code]
     else:
         raise ParameterError("Invalid ring!", code)
 
 
 def get_ring_value(code):
-    if code and code in RING_VALUES:
+    if code is not None and code in RING_VALUES:
         return RING_VALUES[code]
     else:
         raise ParameterError("Invalid ring!", code)
@@ -129,8 +129,8 @@ def is_valid_ring(code):
     return code in RING_NAMES
 
 
+# TODO: logging
 # basic dart game
-
 class Game(object):
 
     def __init__(self, name):
@@ -150,10 +150,13 @@ class Game(object):
         self._legsPerSet = 1
         self._setsPerMatch = 1
 
+        self._variation = None
+        self._settings = None
+
         self._players = None
         self._currentPlayerName = None
         self._currentThrow = 0
-        self._currentRound= 0
+        self._currentRound = 0
         self._currentLeg = 0
         self._currentSet = 0
 
@@ -163,7 +166,7 @@ class Game(object):
         return self.name
 
     def start(self):
-        if self._state and self._state.name == STATE_STOPPED:
+        if self._state is not None and self._state.name == STATE_STOPPED:
             self.winner = None
             self.zero_scores()
             self._state = GameState(STATE_PLAYING)
@@ -174,7 +177,7 @@ class Game(object):
         self._state = GameState(STATE_STOPPED)
 
     def score_player_throw(self, player_name, throw):
-        if self._state and self._state.name == STATE_PLAYING:
+        if self._state is not None and self._state.name == STATE_PLAYING:
             if player_name in self._players:
                 self._players[player_name].append(throw)
             else:
@@ -198,7 +201,7 @@ class Game(object):
         self._players = {}
         self._currentPlayerName = None
         self._currentThrow = 0
-        self._currentRound= 0
+        self._currentRound = 0
         self._currentLeg = 0
         self._currentSet = 0
 
@@ -210,8 +213,8 @@ class Game(object):
         return self._state
     
     @property
-    def numPlayers(self):
-        if self._players:
+    def num_players(self):
+        if self._players is not None:
             return len(self._players)
         else:
             return 0
@@ -224,24 +227,28 @@ class Game(object):
     def options(self):
         return {'Players': self._playerOptions,
                 'Variations': self._variationOptions,
-                'Settings': self._settingOptions }
+                'Settings': self._settingOptions}
 
     @property
     def players(self):
-        if self._players:
+        if self._players is not None:
             return self._players.viewvalues()
         else:
             return None
 
     @players.setter
-    def players(self, playerList):
+    def players(self, player_list):
         self._players.clear()
-        if playerList and len(playerList) > 0:
-            for player in playerList:
+        if player_list is not None and len(player_list) > 0:
+            for player in player_list:
                 if player.name in self._players:
-                    raise ParameterError("List of players contains duplicate player names!", playerList)
+                    raise ParameterError("List of players contains duplicate player names!", player_list)
                 else:
                     self._players[player.name] = player
+
+    @property
+    def settings(self):
+        return self._settings
 
     @property
     def variation(self):
@@ -261,6 +268,8 @@ class Player(object):
         self.name = name
         self.points = 0
         self.throws = []
+        self.targetRingValues = []
+        self.targetWedgeValue = None
         
     def __str__(self):
         return self.name
@@ -268,8 +277,8 @@ class Player(object):
 
 # represents a state of the game
 class GameState(object):
-    def __init__(self, stateName):
-        self.name = stateName
+    def __init__(self, state_name):
+        self.name = state_name
 
     def __str__(self):
         return self.name
@@ -281,43 +290,43 @@ class Throw(object):
     def __init__(self, rng, wdg):
         self._wedge = None
         self._ring = None
-        self.setThrow(rng, wdg)
+        self.set_throw(rng, wdg)
 
     def __str__(self):
-        rep = self.ringName
-        wdg = self.wedgeName  
+        rep = self.ring_name
+        wdg = self.wedge_name
 
-        if rep and wdg:
-    	    rep += " " + wdg
-        elif rep or wdg:
+        if rep is not None and wdg is not None:
+            rep += " " + wdg
+        elif rep is not None or wdg is not None:
             rep = "Incomplete throw, missing wedge or ring"
         else:
             rep = "miss"
         return rep
 
     @property
-    def wedgeName(self):
+    def wedge_name(self):
         return get_wedge_name(self.wedge)
 
     @property
-    def ringName(self):
+    def ring_name(self):
         return get_ring_name(self.ring)
     
     @property
-    def wedgeValue(self):
+    def wedge_value(self):
         return get_wedge_value(self.wedge)
 
     @property
-    def ringValue(self):
+    def ring_value(self):
         return get_ring_value(self.ring)
 
     @property
     def points(self):
-        if self.wedge and self.ring:
-            return (get_ring_value(self.ring) * get_wedge_value(self.wedge))
+        if self.wedge is not None and self.ring is not None:
+            return get_ring_value(self.ring) * get_wedge_value(self.wedge)
         else:
-            raise Error("Incomplete throw, missing wedge or ring",(self.ring, self.wedge))
-    
+            raise Error("Incomplete throw, missing wedge or ring", (self.ring, self.wedge))
+
     @property
     def wedge(self):
         return self._wedge
@@ -342,9 +351,10 @@ class Throw(object):
         else:
             raise ParameterError("Invalid Ring value!", value)
 
-    def setThrow(self, rng, wdg):
+    def set_throw(self, rng, wdg):
         self.ring = rng
         self.wedge = wdg
+
 
 # Errors
 # Base Dart Error
@@ -356,16 +366,17 @@ class Error(Exception):
 
     def __str__(self):
         rep = "Darts Error"
-        if self.msg:
+        if self.msg is not None:
             rep += ": " + self.msg
             
         rep += ": obj = "
         
-        if self.obj:
+        if self.obj is not None:
             rep += self.obj
         else:
             rep += "{None}"
         return rep
+
 
 # Invalid parameter
 class ParameterError(Error):
@@ -376,16 +387,17 @@ class ParameterError(Error):
 
     def __str__(self):
         rep = "Darts Parameter Error"
-        if self.msg:
+        if self.msg is not None:
             rep += ": " + self.msg
             
         rep += ": obj = "
         
-        if self.obj:
+        if self.obj is not None:
             rep += self.obj
         else:
             rep += "{None}"
         return rep
+
 
 # Invalid game variation
 class InvalidVariationError(Error):
@@ -396,16 +408,17 @@ class InvalidVariationError(Error):
 
     def __str__(self):
         rep = "Darts Invalid Game Variation Error"
-        if self.msg:
+        if self.msg is not None:
             rep += ": " + self.msg
             
         rep += ": obj = "
         
-        if self.obj:
+        if self.obj is not None:
             rep += self.obj
         else:
             rep += "{None}"
         return rep
+
 
 # Invalid game state
 class GameStateError(Error):
@@ -416,16 +429,17 @@ class GameStateError(Error):
 
     def __str__(self):
         rep = "Darts Game State Error"
-        if self.msg:
+        if self.msg is not None:
             rep += ": " + self.msg
             
         rep += ": obj = "
         
-        if self.obj:
+        if self.obj is not None:
             rep += self.obj
         else:
             rep += "{None}"
         return rep
+
 
 # Not Implemented
 class NotImplementedError(Error):
@@ -436,16 +450,17 @@ class NotImplementedError(Error):
 
     def __str__(self):
         rep = "Darts Method Not Implemented Error"
-        if self.msg:
+        if self.msg is not None:
             rep += ": " + self.msg
             
         rep += ": obj = "
         
-        if self.obj:
+        if self.obj is not None:
             rep += self.obj
         else:
             rep += "{None}"
         return rep
+
 
 if __name__ == "__main__":
     print("This module contains the base classes for Dart games.")

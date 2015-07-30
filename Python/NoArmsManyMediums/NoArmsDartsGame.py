@@ -18,7 +18,8 @@ No Arms Darts
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import sys, pygame
+import sys
+import pygame
 from pygame.locals import *
 
 pygame.mixer.pre_init(44100, -16, 2, 2048)
@@ -27,12 +28,13 @@ displayInfo = pygame.display.Info()
 
 
 try:
-    screen = pygame.display.set_mode((displayInfo.current_w, displayInfo.current_h), pygame.FULLSCREEN | pygame.HWSURFACE, 32)
+    screen = pygame.display.set_mode((displayInfo.current_w, displayInfo.current_h),
+                                     pygame.FULLSCREEN | pygame.HWSURFACE, 32)
     from namm import *
     dartsGame = NoArmsDarts.NoArmsDarts(screen, "Debug")
-    #print "running darts"
-    dartsGame.Run()
-except (Exception), e:
+    # print "running darts"
+    dartsGame.run()
+except Exception, e:
     print e
 finally:
     pygame.quit()

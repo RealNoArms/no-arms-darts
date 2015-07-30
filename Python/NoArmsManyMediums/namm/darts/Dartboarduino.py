@@ -49,12 +49,12 @@ STCMD_ACKNOWLEDGE = ('A', 'Acknowledging')
 
 LOST_CONNECTION = 'L'
 
+
 # USB Dartboarduino
-
-
 class Dartboarduino(object):
 
-    def __init__(self, log_level='Warn', name='Dartboarduino', retry_count=5, timeout=10, baud_rate=9600):
+    def __init__(self, log_level='Warn', name='Dartboarduino',
+                 autoconnect=True, retry_count=5, timeout=10, baud_rate=9600):
 
         if not os.path.exists("log"):
             os.mkdir("log")
@@ -83,8 +83,10 @@ class Dartboarduino(object):
         self._state = None
         self._usb = None
         self._currentState = None
+        self._port = None
 
-        self._port = self._find_serial_port()
+        if autoconnect:
+            self._port = self._find_serial_port()
         
     def __str__(self):
         return self.name
@@ -177,8 +179,7 @@ class Dartboarduino(object):
         result = None
         if self._usb is not None and self._currentState == STCMD_PLAY[0]:
             try:
-                read_buffer = self._usb.read()
-                if self._usb.inWaiting() > 0 and read_buffer == STCMD_HIT[0]:
+                if self._usb.inWaiting() > 0 and self._usb.read() == STCMD_HIT[0]:
                     w = self._get_serial_response()
                     m = self._get_serial_response()
 

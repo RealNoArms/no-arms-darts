@@ -19,6 +19,6 @@ The No Arms Many Mediums Intro Package
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__all__ = ["Darts"]
+__all__ = ["Darts", "Dartboarduino"]
 
 

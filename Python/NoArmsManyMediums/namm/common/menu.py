@@ -24,7 +24,8 @@ Menu
         http://www.pygame.org/wiki/textwrapping
 """
 
-import pygame, math
+import pygame
+import math
 from pygame.locals import *
 from itertools import chain
 
@@ -36,6 +37,7 @@ MENU_ITEM_RENDER_TYPES = (MENU_ITEM_RENDER_NORMAL,
                           MENU_ITEM_RENDER_HFIT,
                           MENU_ITEM_RENDER_WRAP,
                           MENU_ITEM_RENDER_BLANK)
+
 
 # The basic Menu Item class
 class MenuItem(pygame.font.Font):
@@ -59,7 +61,7 @@ class MenuItem(pygame.font.Font):
         self.pos_y = y
 
     def is_mouse_selection(self, (posx, posy)):
-        if (posx >= self.pos_x and posx <= self.pos_x + self.width) and (posy >= self.pos_y and posy <= self.pos_y + self.height):
+        if (self.pos_x <= posx <= self.pos_x + self.width) and (self.pos_y <= posy <= self.pos_y + self.height):
             return True
         return False
 
@@ -70,10 +72,13 @@ class MenuItem(pygame.font.Font):
     def get_label(self):
         return self.render(self.text, 1, self.font_color)
 
+
 # The Main, Game Menu Class
 # items = [renderType, text, action, max_width]
 class GameMenu():
-    def __init__(self, screen, items, header=None, bg_color=(0,0,0), font=None, font_size=30, font_color=(255, 255, 255)):
+    def __init__(self, screen, items, header=None, bg_color=(0, 0, 0), font=None, font_size=30,
+                 font_color=(255, 255, 255), nav_back=None, nav_done=None, nav_next=None, nav_main=None,
+                 prev_state=None, next_state=None):
  
         self.screen = screen
         self.scr_width = self.screen.get_rect().width
@@ -82,13 +87,21 @@ class GameMenu():
         self.bg_image = None
         self.font = pygame.font.SysFont(font, font_size)
         self.font_color = font_color
+        self.nav_back = nav_back
+        self.nav_done = nav_done
+        self.nav_next = nav_next
+        self.nav_main = nav_main
+        self.prev_state = prev_state
+        self.next_state = next_state
 
         self.base_message_font_size = int(self.scr_height * .15)
         
         self.items = []
+        menu_item = None
+        nav_flag = False
         pos_y = 25    # arbitrary top for now
 
-        if header != None:
+        if header is not None:
             header_font_size = int(1.5 * font_size)
             header_item = MenuItem(header, None, font, header_font_size)
             pos_x = (self.scr_width / 2) - (header_item.width / 2)
@@ -109,20 +122,20 @@ class GameMenu():
             elif item_render == MENU_ITEM_RENDER_HFIT:
                 new_size = font_size
                 test_font = pygame.font.Font(font, new_size)
-                while (max_width != None
+                while (max_width is not None
                        and test_font.size(item_text)[0] > max_width
                        and new_size > 5):
                     if new_size <= 10:
-                        new_size = new_size - 1
+                        new_size -= 1
                     elif new_size <= 30:
-                        new_size = new_size - 2
+                        new_size -= 2
                     else:
-                        new_size = new_size - 5
+                        new_size -= 5
                     test_font = pygame.font.Font(font, new_size)
                 menu_item = MenuItem(item_text, item_action, font, new_size)
             elif item_render == MENU_ITEM_RENDER_WRAP:
                 test_font = pygame.font.Font(font, font_size)
-                if max_width != None:
+                if max_width is not None:
                     for line in wrapline(item_text, test_font, max_width):
                         menu_item = MenuItem(line, item_action, font, font_size)
                         pos_x = (self.scr_width / 2) - (menu_item.width / 2)
@@ -135,30 +148,71 @@ class GameMenu():
             else:
                 menu_item = MenuItem(item_text, item_action, font, font_size)
 
-            if menu_item != None:
+            if menu_item is not None:
                 pos_x = (self.scr_width / 2) - (menu_item.width / 2)
                 menu_item.set_position(pos_x, pos_y)
                 pos_y = pos_y + menu_item.height
                 self.items.append(menu_item)
+
+        # Navigation
+        if self.nav_back is not None:
+            menu_item = MenuItem("", None, font, font_size)
+            pos_y = pos_y + menu_item.height + menu_item.height
+            menu_item = MenuItem('Back', self.nav_back, font, font_size)
+            pos_x = (self.scr_width / 3) - (menu_item.width / 2)
+            menu_item.set_position(pos_x, pos_y)
+            self.items.append(menu_item)
+            nav_flag = True
+
+        if self.nav_done is not None:
+            if not nav_flag:
+                menu_item = MenuItem("", None, font, font_size)
+                pos_y = pos_y + menu_item.height + menu_item.height
+            menu_item = MenuItem('Done', self.nav_done, font, font_size)
+            pos_x = (self.scr_width / 2) - (menu_item.width / 2)
+            menu_item.set_position(pos_x, pos_y)
+            self.items.append(menu_item)
+            nav_flag = True
+
+        if self.nav_next is not None:
+            if not nav_flag:
+                menu_item = MenuItem("", None, font, font_size)
+                pos_y = pos_y + menu_item.height + menu_item.height
+            menu_item = MenuItem('Next', self.nav_next, font, font_size)
+            pos_x = (2 * self.scr_width / 3) - (menu_item.width / 2)
+            menu_item.set_position(pos_x, pos_y)
+            self.items.append(menu_item)
+            nav_flag = True
+
+        if self.nav_main is not None:
+            if not nav_flag:
+                menu_item = MenuItem("", None, font, font_size)
+                self.items.append(menu_item)
+                pos_y = pos_y + menu_item.height
+            pos_y = pos_y + menu_item.height
+            menu_item = MenuItem('Main', self.nav_main, font, font_size)
+            pos_x = (self.scr_width / 2) - (menu_item.width / 2)
+            menu_item.set_position(pos_x, pos_y)
+            self.items.append(menu_item)
         self.clock = pygame.time.Clock()
  
     def get_action(self):
         action = None
 
-        while action == None:
+        while action is None:
             # Limit frame speed to 50 FPS
             self.clock.tick(50)
 
             # Redraw the background
             self.screen.fill(self.bg_color)
-            if (self.bg_image != None):
+            if self.bg_image is not None:
                 self.bg_image.set_alpha(64)
                 self.screen.blit(self.bg_image, [0, 0])
                 
             mpos = pygame.mouse.get_pos()
             
             for item in self.items:
-                if item.is_mouse_selection(mpos) and item.action != None:
+                if item.is_mouse_selection(mpos) and item.action is not None:
                     item.set_font_color((255, 255, 0))
                     item.set_italic(True)
                 else:
@@ -190,34 +244,35 @@ class GameMenu():
 
 
 def truncline(text, font, maxwidth):
-        real=len(text)       
-        stext=text           
-        l=font.size(text)[0]
-        cut=0
-        a=0                  
-        done=1
-        old = None
+        real = len(text)
+        stext = text
+        l = font.size(text)[0]
+        cut = 0
+        a = 0
+        done = 1
+        # old = None
         while l > maxwidth:
-            a=a+1
-            n=text.rsplit(None, a)[0]
+            a += 1
+            n = text.rsplit(None, a)[0]
             if stext == n:
                 cut += 1
-                stext= n[:-cut]
+                stext = n[:-cut]
             else:
                 stext = n
-            l=font.size(stext)[0]
-            real=len(stext)               
-            done=0                        
+            l = font.size(stext)[0]
+            real = len(stext)
+            done = 0
         return real, done, stext             
-        
+
+
 def wrapline(text, font, maxwidth): 
-    done=0                      
-    wrapped=[]                  
+    done = 0
+    wrapped = []
                                
     while not done:             
-        nl, done, stext=truncline(text, font, maxwidth) 
+        nl, done, stext = truncline(text, font, maxwidth)
         wrapped.append(stext.strip())                  
-        text=text[nl:]                                 
+        text = text[nl:]
     return wrapped
  
  
