@@ -67,7 +67,7 @@ class NoArmsDarts():
         self.mainMenu = None
         self.gamesMenu = None
         self.gameMainMenu = None
-        self.gameInstrMenu = None
+        # self.gameInstrMenu = None
         self.gameInstrMainMenu = None
         self.selVariationMenu = None
         self.selPlayersMenu = None
@@ -118,6 +118,13 @@ class NoArmsDarts():
                     if self.gameMainMenu is None:
                         self.gameMainMenu = self.get_game_main_menu(ST_GAMES)
                         self.gameMainMenu.bg_image = self.menuBgImage
+
+                    self.gameInstrMainMenu = None
+                    self.selVariationMenu = None
+                    self.selPlayersMenu = None
+                    self.selSettingsMenu = None
+                    self.summaryMenu = None
+                    
                     selection = self.gameMainMenu.get_action()
                     if selection == ST_LEFT:
                         self.state = self.gameMainMenu.prev_state

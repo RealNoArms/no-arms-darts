@@ -204,7 +204,7 @@ void serialEvent() {
       delay(1000);
       gameState = IFACE_PLAY;
       Serial.write(IFACE_PLAY);
-      playCharge();
+      playMsPacMan();
     }
     break;
   case IFACE_STOP:
@@ -414,6 +414,19 @@ void playCharge() {
   int durations[] = {
     16, 16, 16, 8, 16, 4  };
   int noteCount = 6;
+
+  playMelody(notes, durations, noteCount);
+}
+
+// Plays the Ms. PacMan tune
+void playMsPacMan() {
+  int notes[] = {
+    NOTE_G3, NOTE_A3, NOTE_B3,
+    NOTE_C4, NOTE_E4, NOTE_D4, NOTE_F4, NOTE_E4, NOTE_F4, NOTE_G4, NOTE_E4, NOTE_D4, NOTE_F4,
+    NOTE_E4, NOTE_F4, NOTE_G4, NOTE_E4, NOTE_F4, NOTE_G4, NOTE_A4, NOTE_B5, NOTE_C5, NOTE_B5, NOTE_C5  };
+  int durations[] = {
+    16, 16, 16, 8, 8, 8, 8, 12, 12, 12, 12, 8, 8, 12, 12, 12, 12, 12, 12, 12, 12, 8, 8, 8  };
+  int noteCount = 24;
 
   playMelody(notes, durations, noteCount);
 }
