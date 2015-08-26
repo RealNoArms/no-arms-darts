@@ -20,26 +20,29 @@ No Arms Many Mediums Intro Animation
     Sprites and sound samples were borrowed from Chris Leathley's project,
     Jumpman - Under Construction: 
 
-	http://members.iinet.net.au/~cleathley/jumpman/
+    http://members.iinet.net.au/~cleathley/jumpman/
 
 """
 
 
-import pygame, sys, os
+import pygame
+# import sys
+import os
 from pygame.locals import *
 from namm.common.utilities import *
 
-#pygame.mixer.pre_init(44100, -16, 2, 2048)
-#pygame.init()
-#screen = pygame.display.set_mode((640,480))
+# pygame.mixer.pre_init(44100, -16, 2, 2048)
+# pygame.init()
+# screen = pygame.display.set_mode((640,480))
 
-import nammIntroSprites
+import namm_intro_sprites
+
 
 class NammIntro:
     def __init__(self, screen):
         self.main = screen
-        self.screen = pygame.Surface((640, 480),0,32);
-        
+        self.screen = pygame.Surface((640, 480), 0, 32)
+
         self.RED = (128, 64, 64)
         self.CYAN = (110, 183, 193)
         self.PURPLE = (127, 59, 166)
@@ -49,12 +52,13 @@ class NammIntro:
         self.ORANGE = (133, 83, 28)
         self.WHITE = (255, 255, 255)
 
-        self.colorCycle = [self.RED, self.CYAN, self.PURPLE, self.GREEN, self.BLUE, self.YELLOW, self.ORANGE, self.WHITE]
+        self.colorCycle = [self.RED, self.CYAN, self.PURPLE, self.GREEN, self.BLUE, self.YELLOW,
+                           self.ORANGE, self.WHITE]
         self.colorCycleIndex = 0
         self.noArmsColorCycles = 128
 
         self.backfill = pygame.Surface(self.screen.get_size())
-        self.backfill.fill((0,0,0))
+        self.backfill.fill((0, 0, 0))
         self.backfillRect = self.backfill.get_rect()
 
         self.background = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'jumpman_noarms.png'))
@@ -67,31 +71,37 @@ class NammIntro:
         self.lettersGroup = pygame.sprite.Group()
         self.laddersGroup = pygame.sprite.Group()
 
-        nammIntroSprites.LadderTop.groups = self.laddersGroup
-        nammIntroSprites.Jumpman.groups = self.jumpmanGroup
-        nammIntroSprites.Letter.groups = self.lettersGroup
-        nammIntroSprites.TitleText.groups = self.lettersGroup
+        namm_intro_sprites.LadderTop.groups = self.laddersGroup
+        namm_intro_sprites.Jumpman.groups = self.jumpmanGroup
+        namm_intro_sprites.Letter.groups = self.lettersGroup
+        namm_intro_sprites.TitleText.groups = self.lettersGroup
 
-        self.jumpman = nammIntroSprites.Jumpman((320,127), 'Standing')
+        self.jumpman = namm_intro_sprites.Jumpman((320, 127), 'Standing')
 
         """ Dictionary of Tuple (Sprite, Destination X, Destination Y) keyed by letter """
-        self.letters = { 'n': (nammIntroSprites.Letter((640, 127), 'n.png', self.colorCycle[self.colorCycleIndex]), 99, 246) }
+        self.letters = {'n': (namm_intro_sprites.Letter((640, 127), 'n.png', self.colorCycle[self.colorCycleIndex]),
+                        99, 246)}
         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
-        self.letters['o'] = (nammIntroSprites.Letter((640, 127), 'o.png', self.colorCycle[self.colorCycleIndex]), 180, 246)
+        self.letters['o'] = (namm_intro_sprites.Letter((640, 127), 'o.png', self.colorCycle[self.colorCycleIndex]),
+                             180, 246)
         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
-        self.letters['a'] = (nammIntroSprites.Letter((640, 127), 'a.png', self.colorCycle[self.colorCycleIndex]), 277, 246)
+        self.letters['a'] = (namm_intro_sprites.Letter((640, 127), 'a.png', self.colorCycle[self.colorCycleIndex]),
+                             277, 246)
         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
-        self.letters['r'] = (nammIntroSprites.Letter((640, 127), 'r.png', self.colorCycle[self.colorCycleIndex]), 358, 246)
+        self.letters['r'] = (namm_intro_sprites.Letter((640, 127), 'r.png', self.colorCycle[self.colorCycleIndex]),
+                             358, 246)
         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
-        self.letters['m'] = (nammIntroSprites.Letter((640, 127), 'm.png', self.colorCycle[self.colorCycleIndex]), 447, 246)
+        self.letters['m'] = (namm_intro_sprites.Letter((640, 127), 'm.png', self.colorCycle[self.colorCycleIndex]),
+                             447, 246)
         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
-        self.letters['s'] = (nammIntroSprites.Letter((640, 127), 's.png', self.colorCycle[self.colorCycleIndex]), 531, 246)
+        self.letters['s'] = (namm_intro_sprites.Letter((640, 127), 's.png', self.colorCycle[self.colorCycleIndex]),
+                             531, 246)
         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
 
-        self.leftLadderTop1 = nammIntroSprites.LadderTop((36, 141))
-        self.leftLadderTop2 = nammIntroSprites.LadderTop((60, 141))
-        self.rightLadderTop1 = nammIntroSprites.LadderTop((578, 141))
-        self.leftLadderTop2 = nammIntroSprites.LadderTop((602, 141))
+        self.leftLadderTop1 = namm_intro_sprites.LadderTop((36, 141))
+        self.leftLadderTop2 = namm_intro_sprites.LadderTop((60, 141))
+        self.rightLadderTop1 = namm_intro_sprites.LadderTop((578, 141))
+        self.leftLadderTop2 = namm_intro_sprites.LadderTop((602, 141))
 
         self.fullCaption = 'No Arms Many Mediums Presents...'
         self.startVid = 0
@@ -102,49 +112,63 @@ class NammIntro:
         self.delay = 0
         self.running = True
 
-    def Run(self):
+        self.colorCycleStartingIndex = None
+        self.nextLetter = None
+        self.manyMediums = None
+        self.presents = None
+        self.inspiration = None
+        self.noArmsColorCycleCount = None
+        self.frustrationCount = None
+        self.lettersDone = None
+        self.moved = None
+        self.openingObjectsGroup = None
+        self.pressS = None
+        self.pythonPower = None
+        self.pygamePower = None
 
-	""" Show Python Power Pics """
-	pygame.display.set_caption('Press S to Start')
+    def run(self):
+
+        """ Show Python Power Pics """
+        pygame.display.set_caption('Press S to Start')
         self.openingObjectsGroup = pygame.sprite.Group()
-	nammIntroSprites.OpeningObjects.groups = self.openingObjectsGroup
-	self.pressS = nammIntroSprites.OpeningObjects((320, 150), 'StoStart.png', 0)
-	self.pythonPower = nammIntroSprites.OpeningObjects((320, 285), 'python-powered-h-140x182.png', 0)
-	self.pygamePower = nammIntroSprites.OpeningObjects((320, 385), 'pygame_logo.png', 1)
+        namm_intro_sprites.OpeningObjects.groups = self.openingObjectsGroup
+        self.pressS = namm_intro_sprites.OpeningObjects((320, 150), 'StoStart.png', 0)
+        self.pythonPower = namm_intro_sprites.OpeningObjects((320, 285), 'python-powered-h-140x182.png', 0)
+        self.pygamePower = namm_intro_sprites.OpeningObjects((320, 385), 'pygame_logo.png', 1)
 
-	self.openingObjectsGroup.clear(self.screen, self.backfill)
-	self.openingObjectsGroup.update()
-	self.openingObjectsGroup.draw(self.screen)
+        self.openingObjectsGroup.clear(self.screen, self.backfill)
+        self.openingObjectsGroup.update()
+        self.openingObjectsGroup.draw(self.screen)
 
-	pygame.transform.scale(self.screen, self.main.get_size(), self.main)
-	#self.main.blit(self.screen, (0,0))
+        pygame.transform.scale(self.screen, self.main.get_size(), self.main)
+        # self.main.blit(self.screen, (0,0))
 
-	pygame.display.flip()
+        pygame.display.flip()
 
         while self.running:
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    self.introStep= 15
+                    self.introStep = 15
                 elif event.type == KEYDOWN:
                     if event.key == K_s:
                         self.startVid = 1
                     elif event.key in (K_q, K_ESCAPE):
-                        self.introStep= 15
+                        self.introStep = 15
             
             if self.introStep == 0 and self.startVid:
                 # Pause Before Fading In
-		pygame.display.set_caption('...')
+                pygame.display.set_caption('...')
                 pygame.time.delay(2000)
                 self.introStep += 1
 
             elif self.introStep == 1:
                 # Fade In Screen
-                pygame.transform.scale(self.screen, (640,480))
+                pygame.transform.scale(self.screen, (640, 480))
                 self.background.set_alpha(self.fadeInAlpha)
                 self.screen.blit(self.backfill, self.backfillRect)
                 
                 pygame.transform.scale(self.screen, self.main.get_size(), self.main)
-                #self.main.blit(self.screen, (0,0))
+                # self.main.blit(self.screen, (0,0))
 
                 self.fadeInAlpha += 3
 
@@ -153,11 +177,11 @@ class NammIntro:
                 else:
                     pygame.time.delay(5)
 
-                pygame.transform.scale(self.screen, (640,480))
+                pygame.transform.scale(self.screen, (640, 480))
                 self.screen.blit(self.background, self.backgroundRect)
                 
                 pygame.transform.scale(self.screen, self.main.get_size(), self.main)
-                #self.main.blit(self.screen, (0,0))
+                # self.main.blit(self.screen, (0,0))
                 
             elif self.introStep == 2:
                 # Pause Before Jumpman Appears
@@ -198,7 +222,7 @@ class NammIntro:
                             self.letters['a'][0].move_to_x(self.letters['a'][1], self.gameSpeed)
                             self.letters['r'][0].move_to_x(self.letters['r'][1], self.gameSpeed)
                             self.letters['m'][0].move_to_x(self.letters['m'][1], self.gameSpeed)
-                            self.letters['s'][0].move_to_x(640, self.gameSpeed) # troublemaker
+                            self.letters['s'][0].move_to_x(640, self.gameSpeed)  # troublemaker
                             
                             self.introStep += 1
                     else:
@@ -213,7 +237,8 @@ class NammIntro:
                     for letter in self.letters.viewkeys():
                         # [0] = sprite, [1] = x, [2] = y
                         if letter != 's' and self.letters[letter][0].state == 'Still':
-                            if self.letters[letter][0].pos[0] == self.letters[letter][1] and self.letters[letter][0].pos[1] == self.letters[letter][2]:
+                            if self.letters[letter][0].pos[0] == self.letters[letter][1] and \
+                                    self.letters[letter][0].pos[1] == self.letters[letter][2]:
                                 # letter in final spot
                                 self.lettersDone += 1
                                 if letter == 'm':
@@ -263,12 +288,12 @@ class NammIntro:
                             if self.frustrationCount == 1:
                                 if self.letters['s'][0].pos[0] < 640:
                                     # first time, s goes back to far right, jumpman waits
-                                    self.letters['s'][0].move_to_x(640, self.gameSpeed) # troublemaker
+                                    self.letters['s'][0].move_to_x(640, self.gameSpeed)  # troublemaker
                                 else:
                                     self.introStep = 7
                             elif self.frustrationCount == 2:
                                 # second time, s continues further left while jumpman heads back far right
-                                self.letters['s'][0].move_to_x(180, self.gameSpeed) # troublemaker
+                                self.letters['s'][0].move_to_x(180, self.gameSpeed)  # troublemaker
                                 self.introStep += 1
                                 
                     else:
@@ -284,11 +309,13 @@ class NammIntro:
                         self.introStep += 1
                                 
                 elif self.introStep == 11:
-                    if self.jumpman.state == 'RunningLeft' and self.jumpman.pos[1] <= 575 and self.jumpman.previousState == 'Standing':
+                    if self.jumpman.state == 'RunningLeft' and self.jumpman.pos[1] <= 575 and \
+                            self.jumpman.previousState == 'Standing':
                         self.jumpman.set_state('JumpingLeft')
                     if self.letters['s'][0].state == 'Still':
                         # s gets to chain, drop it
-                        if self.letters['s'][0].pos[0] == self.letters['s'][1] and self.letters['s'][0].pos[1] == self.letters['s'][2]:
+                        if self.letters['s'][0].pos[0] == self.letters['s'][1] and \
+                                self.letters['s'][0].pos[1] == self.letters['s'][2]:
                             # if s is secure, stop the falling sound
                             self.letters['s'][0].fall.stop()
                             if self.jumpman.state == 'Standing':
@@ -308,9 +335,9 @@ class NammIntro:
                 elif self.introStep == 12:
                     if self.jumpman.state == 'NoArms':
                         # Arms set down, show other title text
-                        self.manyMediums = nammIntroSprites.TitleText((320, 285), 'manyMediums.png')
-                        self.presents = nammIntroSprites.TitleText((320, 317), 'presents.png')
-                        self.inspiration = nammIntroSprites.TitleText((320, 387), 'inspiration.png')
+                        self.manyMediums = namm_intro_sprites.TitleText((320, 285), 'manyMediums.png')
+                        self.presents = namm_intro_sprites.TitleText((320, 317), 'presents.png')
+                        self.inspiration = namm_intro_sprites.TitleText((320, 387), 'inspiration.png')
 
                         pygame.display.set_caption(self.fullCaption)
 
@@ -322,7 +349,8 @@ class NammIntro:
                 elif self.introStep == 13:
                     if self.noArmsColorCycleCount <= self.noArmsColorCycles:
                         self.noArmsColorCycleCount += 1
-                        self.colorCycleStartingIndex = wrap_increment(self.colorCycleStartingIndex, len(self.colorCycle))
+                        self.colorCycleStartingIndex = wrap_increment(self.colorCycleStartingIndex,
+                                                                      len(self.colorCycle))
                         self.colorCycleIndex = self.colorCycleStartingIndex
                         self.letters['n'][0].color = self.colorCycle[self.colorCycleIndex]
                         self.colorCycleIndex = wrap_increment(self.colorCycleIndex, len(self.colorCycle))
@@ -342,22 +370,22 @@ class NammIntro:
 
                 elif self.introStep == 14:
                     if self.nextLetter == 'n':
-                        self.letters['n'][0].color = (0,0,0)
+                        self.letters['n'][0].color = (0, 0, 0)
                         self.nextLetter = 'o'
                     elif self.nextLetter == 'o':
-                        self.letters['o'][0].color = (0,0,0)
+                        self.letters['o'][0].color = (0, 0, 0)
                         self.nextLetter = 'a'
                     elif self.nextLetter == 'a':
-                        self.letters['a'][0].color = (0,0,0)
+                        self.letters['a'][0].color = (0, 0, 0)
                         self.nextLetter = 'r'
                     elif self.nextLetter == 'r':
-                        self.letters['r'][0].color = (0,0,0)
+                        self.letters['r'][0].color = (0, 0, 0)
                         self.nextLetter = 'm'
                     elif self.nextLetter == 'm':
-                        self.letters['m'][0].color = (0,0,0)
+                        self.letters['m'][0].color = (0, 0, 0)
                         self.nextLetter = 's'
                     elif self.nextLetter == 's':
-                        self.letters['s'][0].color = (0,0,0)
+                        self.letters['s'][0].color = (0, 0, 0)
                         self.nextLetter = 'x'
                     else:
                         self.delay = 1000
@@ -366,7 +394,7 @@ class NammIntro:
                 elif self.introStep == 15:
                     self.running = False
                         
-                pygame.transform.scale(self.screen, (640,480))
+                pygame.transform.scale(self.screen, (640, 480))
                 
                 self.lettersGroup.clear(self.screen, self.background)
                 self.jumpmanGroup.clear(self.screen, self.background)
@@ -381,7 +409,6 @@ class NammIntro:
                 self.laddersGroup.draw(self.screen)
                 
             pygame.transform.scale(self.screen, self.main.get_size(), self.main)
-            #self.main.blit(self.screen, (0,0))
+            # self.main.blit(self.screen, (0,0))
             pygame.display.flip()
             pygame.time.delay(self.delay)
-

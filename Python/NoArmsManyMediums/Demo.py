@@ -18,8 +18,9 @@ No Arms Many Mediums Demo
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import sys, pygame
-from pygame.locals import *
+import sys
+import pygame
+# from pygame.locals import *
 
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.init()
@@ -27,8 +28,8 @@ displayInfo = pygame.display.Info()
 
 try:
     screen = pygame.display.set_mode((displayInfo.current_w, displayInfo.current_h), pygame.FULLSCREEN | pygame.HWSURFACE, 32)
-    import namm.intro.nammIntro
-    intro = namm.intro.nammIntro.NammIntro(screen)
+    import namm.intro.namm_intro
+    intro = namm.intro.namm_intro.NammIntro(screen)
     intro.Run()
 except:
     print "Uncool error"

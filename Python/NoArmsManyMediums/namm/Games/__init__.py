@@ -19,14 +19,17 @@ The No Arms Many Mediums Game Library
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import aroundTheWorld
 
-__all__ = ["AroundTheWorld"]
+__all__ = ["aroundTheWorld"]
+
 
 def get_game_list():
     return ["Around The World"]
 
+
 def get_game(game_name):
     if game_name == "Around The World":
-        return AroundTheWorld.AroundTheWorld()
+        return aroundTheWorld.AroundTheWorld()
     else:
         return None

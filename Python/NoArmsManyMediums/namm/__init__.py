@@ -20,4 +20,4 @@ The No Arms Many Mediums Package
 """
 
 
-__all__ = ["NoArmsDarts"]
+__all__ = ["no_arms_darts"]

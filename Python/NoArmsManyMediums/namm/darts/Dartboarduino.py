@@ -20,13 +20,13 @@ Classes in the USB Dartboarduino Model
 """
 
 import os
-import pygame
+# import pygame
 import serial
 import sys
-import time
+# import time
 
 from struct import unpack
-from namm.common import *
+from namm.common.logger import Logger
 
 # from the Arduino sketch:
 # define IFACE_ACK           'A'
@@ -47,7 +47,7 @@ STCMD_DISCONNECT = ('D', 'Disconnected')
 STCMD_QUERY = ('Q', 'Querying')
 STCMD_ACKNOWLEDGE = ('A', 'Acknowledging')
 
-LOST_CONNECTION = 'L'
+LOST_CONNECTION = ('L', 'Lost Connection')
 
 
 # USB Dartboarduino
@@ -58,7 +58,7 @@ class Dartboarduino(object):
 
         if not os.path.exists("log"):
             os.mkdir("log")
-        self._logger = utilities.Logger(log_level, os.path.join("log", "Dartboarduino.log"))
+        self._logger = Logger(log_level, os.path.join("log", "Dartboarduino.log"))
         self._logger.start()
 
         self._logger.log("Debug", "Log Level: " + str(log_level))
@@ -78,7 +78,8 @@ class Dartboarduino(object):
                           STCMD_CONNECT[0]: STCMD_CONNECT[1],
                           STCMD_DISCONNECT[0]: STCMD_DISCONNECT[1],
                           STCMD_QUERY[0]: STCMD_QUERY[1],
-                          STCMD_ACKNOWLEDGE[0]: STCMD_ACKNOWLEDGE[1]}
+                          STCMD_ACKNOWLEDGE[0]: STCMD_ACKNOWLEDGE[1],
+                          LOST_CONNECTION[0]: LOST_CONNECTION[1]}
 
         self._state = None
         self._usb = None
@@ -207,7 +208,7 @@ class Dartboarduino(object):
                 self._logger.log("Warn", "Lost connection to the port!")
                 self._usb = None
                 self._currentState = None
-                result = (LOST_CONNECTION, 0)
+                result = (LOST_CONNECTION[0], 0)
         else:
             self._logger.log("Warn", "get_hit : Board state is not '" + STCMD_PLAY[1] + "', so port was not read.")
             # self._logger.log("Info", "get_hit : Current board state: " + str(self.state))
@@ -379,15 +380,17 @@ class Dartboarduino(object):
                 self._logger.log("Warn", "Lost connection to the port!")
                 self._usb = None
                 self._currentState = None
-                response = LOST_CONNECTION
+                response = LOST_CONNECTION[0]
         else:
             self._logger.log("Warn", "_get_serial_response : Port not open, so no request was sent")
         self._logger.log("Debug", "_get_serial_response() returning: " + str(response))
         return response
 
 
+# testing
 def test(log_level):
     try:
+        print("Detecting Dartboarduinos, might take a minute...")
         board = Dartboarduino(log_level)
 
         if board.state is None:
@@ -398,14 +401,14 @@ def test(log_level):
             command_menu = ["Get Board Status", "Connect to Board", "Disconnect from Board", "Play Game",
                             "Stop Game", "Get Hit"]
             choice = "0"
-            i = -1
-            while choice != str(i):
-                i = 0
+            j = -1
+            while choice != str(j):
+                j = 0
                 print("\n============[ Commands ]=============")
-                while i < len(command_menu):
-                    print("[" + str(i) + "] " + command_menu[i])
-                    i += 1
-                print("[" + str(i) + "] Exit")
+                while j < len(command_menu):
+                    print("[" + str(j) + "] " + command_menu[j])
+                    j += 1
+                print("[" + str(j) + "] Exit")
                 # print(str(board.name) + " state: " + str(board.state))
                 print
 
@@ -432,9 +435,9 @@ if __name__ == "__main__":
     print("This module contains classes to interface with a USB Dartboarduino.")
 
     main_menu = ["Debug", "Info", "Warn", "Error", "Fatal"]
-    choice = "0"
+    main_choice = "0"
     i = -1
-    while choice != str(i):
+    while main_choice != str(i):
         i = 0
         print("\n=================[ Main ]=================")
         while i < len(main_menu):
@@ -443,9 +446,8 @@ if __name__ == "__main__":
         print("[" + str(i) + "] Exit")
         print
 
-        choice = raw_input("Enter Menu Option ==>  ")
-        if "0" <= choice <= str(len(main_menu)-1):
-            print("Detecting Dartboarduinos, might take a minute...")
-            test(main_menu[int(choice)])
-        elif choice != str(i):
+        main_choice = raw_input("Enter Menu Option ==>  ")
+        if "0" <= main_choice <= str(len(main_menu)-1):
+            test(main_menu[int(main_choice)])
+        elif main_choice != str(i):
             print("Why don't you try picking one of the options next time, jackass?")

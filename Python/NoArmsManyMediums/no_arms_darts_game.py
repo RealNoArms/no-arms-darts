@@ -1,9 +1,8 @@
 """
 
-The No Arms Many Mediums Common Controllers module
+No Arms Darts
 
-
-    Copyright (C) 2013  Tim Kracht <timkracht4@gmail.com>
+    Copyright (C) 2014  Tim Kracht <timkracht4@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +18,23 @@ The No Arms Many Mediums Common Controllers module
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-""" The Controller base class """
-class Controller:
-    def __init__(self):
-        self.name = "Namm Controller"
+import sys
+import pygame
+
+
+pygame.mixer.pre_init(44100, -16, 2, 2048)
+pygame.init()
+displayInfo = pygame.display.Info()
+
+try:
+    screen = pygame.display.set_mode((displayInfo.current_w, displayInfo.current_h),
+                                     pygame.FULLSCREEN | pygame.HWSURFACE, 32)
+    from namm import no_arms_darts
+    dartsGame = no_arms_darts.NoArmsDarts(screen, "Warn")
+    # print "running darts"
+    dartsGame.run()
+except Exception, e:
+    print e
+finally:
+    pygame.quit()
+    sys.exit()

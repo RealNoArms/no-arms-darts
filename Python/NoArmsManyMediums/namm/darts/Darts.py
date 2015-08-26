@@ -19,6 +19,9 @@ Classes in the Base Darts model
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from namm.common.error import Error
+# from namm.common.logger import Logger
+
 # package-level stuff
 WEDGE_NAMES = {"1": "1",
                "2": "2",
@@ -82,17 +85,19 @@ STATE_STOPPED = "Stopped"
 STATE_PAUSED = "Paused"
 STATE_GAMEOVER = "Game Over"
 
-# Standard instructions headings
-INSTR_SUMMARY = "Summary"
-INSTR_OBJECT = "Object"
-INSTR_SCORING = "Scoring"
-INSTR_GAMEPLAY = "Game Play"
-INSTR_VARIATIONS = "Variations"
+# Instructions
+INSTR_SUMMARY = "Instructions Summary"
+INSTR_OBJECT = "Instructions Object"
+INSTR_SCORING = "Instructions Scoring"
+INSTR_GAMEPLAY = "Instructions Game Play"
+INSTR_VARIATIONS = "Instructions Variations"
 
 # Standard Variation
 GAME_VARIATION_STD = "Standard"
 
+# TODO: Go!!!!!
 
+# common Darts functions
 def get_wedge_name(code):
     if code is not None and code in WEDGE_NAMES:
         return WEDGE_NAMES[code]
@@ -134,13 +139,13 @@ def is_valid_ring(code):
 class Game(object):
 
     def __init__(self, name):
-        self.name = name
+        self._name = name
         self._playerOptions = []
         self._variationOptions = []
         self._variationOptions.append(GAME_VARIATION_STD)
         self._settingOptions = []
         self._state = None
-        self.winner = None
+        self._winner = None
 
         self._minPlayers = 1
         self._maxPlayers = 4
@@ -163,11 +168,11 @@ class Game(object):
         self.reset()
         
     def __str__(self):
-        return self.name
+        return self._name
 
     def start(self):
         if self._state is not None and self._state.name == STATE_STOPPED:
-            self.winner = None
+            self._winner = None
             self.zero_scores()
             self._state = GameState(STATE_PLAYING)
         else:
@@ -206,7 +211,15 @@ class Game(object):
         self._currentSet = 0
 
         self._state = GameState(STATE_STOPPED)
-        self.winner = None
+        self._winner = None
+
+    def game_menu(self, screen, background, font, log_level):
+        raise DartsNotImplementedError("No Menu Set!", self)
+
+    # Properties
+    @property
+    def name(self):
+        return self._name
 
     @property
     def state(self):
@@ -221,13 +234,25 @@ class Game(object):
 
     @property
     def instructions(self):
-        raise NotImplementedError("No game instructions!", None)
+        raise DartsNotImplementedError("No game instructions!", None)
 
     @property
     def options(self):
         return {'Players': self._playerOptions,
                 'Variations': self._variationOptions,
                 'Settings': self._settingOptions}
+
+    @property
+    def player_options(self):
+        return self._playerOptions
+
+    @property
+    def setting_options(self):
+        return self._settingOptions
+
+    @property
+    def variation_options(self):
+        return self._variationOptions
 
     @property
     def players(self):
@@ -249,6 +274,13 @@ class Game(object):
     @property
     def settings(self):
         return self._settings
+
+    @settings.setter
+    def settings(self, value):
+        if value in self._settingOptions:
+            self._settings = value
+        else:
+            raise ParameterError("Invalid Game settings!", value)
 
     @property
     def variation(self):
@@ -358,108 +390,43 @@ class Throw(object):
 
 # Errors
 # Base Dart Error
-class Error(Exception):
+class DartsError(Error):
 
-    def __init__(self, msg, obj):
-        self.msg = msg
-        self.obj = obj
-
-    def __str__(self):
-        rep = "Darts Error"
-        if self.msg is not None:
-            rep += ": " + self.msg
-            
-        rep += ": obj = "
-        
-        if self.obj is not None:
-            rep += self.obj
-        else:
-            rep += "{None}"
-        return rep
+    def __init__(self, msg=None, obj=None):
+        super(DartsError, self).__init__(msg, obj)
+        self._rep = "Darts Error"
 
 
 # Invalid parameter
-class ParameterError(Error):
+class ParameterError(DartsError):
 
-    def __init__(self, msg, obj):
-        self.msg = msg
-        self.obj = obj
-
-    def __str__(self):
-        rep = "Darts Parameter Error"
-        if self.msg is not None:
-            rep += ": " + self.msg
-            
-        rep += ": obj = "
-        
-        if self.obj is not None:
-            rep += self.obj
-        else:
-            rep += "{None}"
-        return rep
+    def __init__(self, msg=None, obj=None):
+        super(ParameterError, self).__init__(msg, obj)
+        self._rep = "Darts Parameter Error"
 
 
 # Invalid game variation
-class InvalidVariationError(Error):
+class InvalidVariationError(DartsError):
 
-    def __init__(self, msg, obj):
-        self.msg = msg
-        self.obj = obj
-
-    def __str__(self):
-        rep = "Darts Invalid Game Variation Error"
-        if self.msg is not None:
-            rep += ": " + self.msg
-            
-        rep += ": obj = "
-        
-        if self.obj is not None:
-            rep += self.obj
-        else:
-            rep += "{None}"
-        return rep
+    def __init__(self, msg=None, obj=None):
+        super(InvalidVariationError, self).__init__(msg, obj)
+        self._rep = "Darts Invalid Game Variation Error"
 
 
 # Invalid game state
-class GameStateError(Error):
+class GameStateError(DartsError):
 
-    def __init__(self, msg, obj):
-        self.msg = msg
-        self.obj = obj
-
-    def __str__(self):
-        rep = "Darts Game State Error"
-        if self.msg is not None:
-            rep += ": " + self.msg
-            
-        rep += ": obj = "
-        
-        if self.obj is not None:
-            rep += self.obj
-        else:
-            rep += "{None}"
-        return rep
+    def __init__(self, msg=None, obj=None):
+        super(GameStateError, self).__init__(msg, obj)
+        self._rep = "Darts Game State Error"
 
 
 # Not Implemented
-class NotImplementedError(Error):
+class DartsNotImplementedError(DartsError):
 
-    def __init__(self, msg, obj):
-        self.msg = msg
-        self.obj = obj
-
-    def __str__(self):
-        rep = "Darts Method Not Implemented Error"
-        if self.msg is not None:
-            rep += ": " + self.msg
-            
-        rep += ": obj = "
-        
-        if self.obj is not None:
-            rep += self.obj
-        else:
-            rep += "{None}"
-        return rep
+    def __init__(self, msg=None, obj=None):
+        super(DartsNotImplementedError, self).__init__(msg, obj)
+        self._rep = "Darts Method Not Implemented Error"
 
 
 if __name__ == "__main__":

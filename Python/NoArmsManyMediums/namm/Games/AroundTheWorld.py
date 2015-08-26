@@ -19,7 +19,8 @@ Darts Games - Around The World
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from namm.darts import *
+from namm.darts import darts
+from namm.darts.darts_menu import DartMenu
 
 ATW_VARIATION_DUBS = "Doubles Only"
 ATW_VARIATION_SKIP = "Skip'n'Jump"
@@ -28,7 +29,7 @@ ATW_VARIATION_SHANG = "Shanghai"
 
 
 # TODO: logging
-class AroundTheWorld(Darts.Game):
+class AroundTheWorld(darts.Game):
 
     def __init__(self):
         super(AroundTheWorld, self).__init__("Around The World")
@@ -37,8 +38,13 @@ class AroundTheWorld(Darts.Game):
         self._variationOptions.append(ATW_VARIATION_SKIP)
         self._variationOptions.append(ATW_VARIATION_DUBOUT)
         self._variationOptions.append(ATW_VARIATION_SHANG)
-        self._variation = Darts.GAME_VARIATION_STD
+        self._variation = darts.GAME_VARIATION_STD
         self._settingOptions = None
+
+        self.players = [darts.Player("Player 1")]
+
+    def game_menu(self, screen, background, font, log_level):
+        return DartMenu(self, screen, background, font, log_level)
 
     @property
     def variation(self):
@@ -53,34 +59,34 @@ class AroundTheWorld(Darts.Game):
     def instructions(self):
         instr = {}
 
-        instr[Darts.INSTR_SUMMARY] = []
-        instr[Darts.INSTR_SUMMARY].append("Also known as 'Round the Clock'")
-        instr[Darts.INSTR_SUMMARY].append("Number of Players: any")
-        instr[Darts.INSTR_SUMMARY].append("Darts per Round: 3")
-        instr[Darts.INSTR_SUMMARY].append("An easy, fast and fun game that helps to develop accuracy.")
+        instr[darts.INSTR_SUMMARY] = []
+        instr[darts.INSTR_SUMMARY].append("Also known as 'Round the Clock'")
+        instr[darts.INSTR_SUMMARY].append("Number of Players: any")
+        instr[darts.INSTR_SUMMARY].append("Darts per Round: 3")
+        instr[darts.INSTR_SUMMARY].append("An easy, fast and fun game that helps to develop accuracy.")
         
-        instr[Darts.INSTR_OBJECT] = []
-        instr[Darts.INSTR_OBJECT].append("Be the first player to hit all the numbers on the board, in order.")
+        instr[darts.INSTR_OBJECT] = []
+        instr[darts.INSTR_OBJECT].append("Be the first player to hit all the numbers on the board, in order.")
 
-        instr[Darts.INSTR_GAMEPLAY] = []
-        instr[Darts.INSTR_GAMEPLAY].append("Each player throws 3 darts per round.")
-        instr[Darts.INSTR_GAMEPLAY].append("Players begin throwing at the 1.  After a player hits the 1, that player"
+        instr[darts.INSTR_GAMEPLAY] = []
+        instr[darts.INSTR_GAMEPLAY].append("Each player throws 3 darts per round.")
+        instr[darts.INSTR_GAMEPLAY].append("Players begin throwing at the 1.  After a player hits the 1, that player"
                                            " throws at the 2 next, then the 3, and so on.")
-        instr[Darts.INSTR_GAMEPLAY].append("Singles, doubles and triples all count the same.")
-        instr[Darts.INSTR_GAMEPLAY].append("Each new round, players pick up where they left off in the previous round.")
-        instr[Darts.INSTR_GAMEPLAY].append("The first player to hit all the numbers in order from 1-20 wins.")
+        instr[darts.INSTR_GAMEPLAY].append("Singles, doubles and triples all count the same.")
+        instr[darts.INSTR_GAMEPLAY].append("Each new round, players pick up where they left off in the previous round.")
+        instr[darts.INSTR_GAMEPLAY].append("The first player to hit all the numbers in order from 1-20 wins.")
 
-        instr[Darts.INSTR_SCORING] = []
-        instr[Darts.INSTR_SCORING].append("No Arms Darts awards 1 point for each target number hit.")
+        instr[darts.INSTR_SCORING] = []
+        instr[darts.INSTR_SCORING].append("No Arms Darts awards 1 point for each target number hit.")
 
-        instr[Darts.INSTR_VARIATIONS] = []
-        instr[Darts.INSTR_VARIATIONS].append("Skip'n'Jump: Same as the standard rules, except doubles skip the next "
+        instr[darts.INSTR_VARIATIONS] = []
+        instr[darts.INSTR_VARIATIONS].append("Skip'n'Jump: Same as the standard rules, except doubles skip the next "
                                              "number and triples skip the next 2 numbers.")
-        instr[Darts.INSTR_VARIATIONS].append("Double-out: Same as the standard rules, except players must hit the "
+        instr[darts.INSTR_VARIATIONS].append("Double-out: Same as the standard rules, except players must hit the "
                                              "double ring when shooting for 20.")
-        instr[Darts.INSTR_VARIATIONS].append("Doubles Only: Same as the standard rules, except players must hit the "
+        instr[darts.INSTR_VARIATIONS].append("Doubles Only: Same as the standard rules, except players must hit the "
                                              "double ring for all numbers.")
-        instr[Darts.INSTR_VARIATIONS].append("Shanghai: Same as the standard rules, except players must hit a single, "
+        instr[darts.INSTR_VARIATIONS].append("Shanghai: Same as the standard rules, except players must hit a single, "
                                              "double and triple of each number before moving to the next.")
 
         return instr
@@ -116,7 +122,7 @@ class AroundTheWorld(Darts.Game):
             if hit_out:
                 self._players[player_name].targetWedgeValue = None
                 self.winner = self._players[player_name]
-                self._state = Darts.GameState(Darts.STATE_GAMEOVER)
+                self._state = darts.GameState(darts.STATE_GAMEOVER)
             elif hit_target:
                 if self._variation == ATW_VARIATION_SKIP:
                     self._players[player_name].targetWedgeValue += throw.ringValue

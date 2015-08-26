@@ -19,31 +19,36 @@ Sprites for the No Arms Many Mediums Intro
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, os
+import pygame
+import os
 from pygame.locals import *
 from namm.common.utilities import *
 
-""" the sprite state class """
-class SpriteState:
-    def __init__(self, stateName):
-        self.name = stateName
 
-""" tops of ladders (so jumpman appears behind them) """
+# the sprite state class
+class SpriteState:
+    def __init__(self, state_name):
+        self.name = state_name
+        self.images = None
+
+
+# tops of ladders (so jumpman appears behind them)
 class LadderTop(pygame.sprite.Sprite):
 
     image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'ladderTop.png'))
     image.convert()
     
-    def __init__(self, initPos):
+    def __init__(self, init_pos):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = LadderTop.image
-        self.pos = initPos
+        self.pos = init_pos
         self.rect = self.image.get_rect()
+
     def update(self):
-       self.rect.center = self.pos
+        self.rect.center = self.pos
        
        
-"""the jumpman sprite"""
+# the jumpman sprite
 class Jumpman(pygame.sprite.Sprite):
 
     grow = pygame.mixer.Sound(os.path.join('namm', 'sounds', 'NoArmsIntro', 'JumpmanAppear.wav'))
@@ -53,16 +58,16 @@ class Jumpman(pygame.sprite.Sprite):
     huh = pygame.mixer.Sound(os.path.join('namm', 'sounds', 'NoArmsIntro', 'Bounce.wav'))
 
     standingState = SpriteState('Standing')
-    standingState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'StandStill.png')) ]
+    standingState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'StandStill.png'))]
     standingState.images[0] = standingState.images[0].convert()
-    standingState.images[0].set_colorkey(standingState.images[0].get_at((0,0)), RLEACCEL)
+    standingState.images[0].set_colorkey(standingState.images[0].get_at((0, 0)), RLEACCEL)
     
     runningLeftState = SpriteState('RunningLeft')
-    runningLeftState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'RunLeft1.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'RunLeft2.png')) ]
+    runningLeftState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'RunLeft1.png')),
+                               pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'RunLeft2.png'))]
     for i in range(len(runningLeftState.images)):
         runningLeftState.images[i] = runningLeftState.images[i].convert()
-        runningLeftState.images[i].set_colorkey(runningLeftState.images[i].get_at((0,0)), RLEACCEL)
+        runningLeftState.images[i].set_colorkey(runningLeftState.images[i].get_at((0, 0)), RLEACCEL)
     
     runningRightState = SpriteState('RunningRight')
     runningRightState.images = []
@@ -70,14 +75,14 @@ class Jumpman(pygame.sprite.Sprite):
         runningRightState.images.append(pygame.transform.flip(img, 1, 0))
 
     jumpingUpState = SpriteState('JumpingUp')
-    jumpingUpState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'JumpCenter.png')) ]
+    jumpingUpState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'JumpCenter.png'))]
     jumpingUpState.images[0] = jumpingUpState.images[0].convert()
-    jumpingUpState.images[0].set_colorkey(jumpingUpState.images[0].get_at((0,4)), RLEACCEL)
+    jumpingUpState.images[0].set_colorkey(jumpingUpState.images[0].get_at((0, 4)), RLEACCEL)
 
     jumpingLeftState = SpriteState('JumpingLeft')
-    jumpingLeftState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'JumpLeft.png')) ]
+    jumpingLeftState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'JumpLeft.png'))]
     jumpingLeftState.images[0] = jumpingLeftState.images[0].convert()
-    jumpingLeftState.images[0].set_colorkey(jumpingLeftState.images[0].get_at((0,0)), RLEACCEL)
+    jumpingLeftState.images[0].set_colorkey(jumpingLeftState.images[0].get_at((0, 0)), RLEACCEL)
     
     jumpingRightState = SpriteState('JumpingRight')
     jumpingRightState.images = []
@@ -85,52 +90,59 @@ class Jumpman(pygame.sprite.Sprite):
         jumpingRightState.images.append(pygame.transform.flip(img, 1, 0))
     
     droppingArmsState = SpriteState('DroppingArms')
-    droppingArmsState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms1.png')),
+    droppingArmsState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms1.png')),
                                 pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms2.png')),
                                 pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms3.png')),
                                 pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms4.png')),
                                 pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms5.png')),
                                 pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms6.png')),
                                 pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms7.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms8.png')) ]
+                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms8.png'))]
     for i in range(len(droppingArmsState.images)):
         droppingArmsState.images[i] = droppingArmsState.images[i].convert()
-        droppingArmsState.images[i].set_colorkey(droppingArmsState.images[i].get_at((0,0)), RLEACCEL)
+        droppingArmsState.images[i].set_colorkey(droppingArmsState.images[i].get_at((0, 0)), RLEACCEL)
     
     growingState = SpriteState('Growing')
-    growingState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow1.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow2.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow3.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow4.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow5.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow6.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow7.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow8.png')),
-                                pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow9.png')) ]
+    growingState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow1.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow2.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow3.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow4.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow5.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow6.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow7.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow8.png')),
+                           pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'Grow9.png'))]
     for i in range(len(growingState.images)):
         growingState.images[i] = growingState.images[i].convert()
-        growingState.images[i].set_colorkey(growingState.images[i].get_at((0,0)), RLEACCEL)
+        growingState.images[i].set_colorkey(growingState.images[i].get_at((0, 0)), RLEACCEL)
         
     noArmsState = SpriteState('NoArms')
-    noArmsState.images = [ pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms8.png')) ]
+    noArmsState.images = [pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', 'DropArms8.png'))]
     noArmsState.images[0] = noArmsState.images[0].convert()
-    noArmsState.images[0].set_colorkey(noArmsState.images[0].get_at((0,0)), RLEACCEL)
+    noArmsState.images[0].set_colorkey(noArmsState.images[0].get_at((0, 0)), RLEACCEL)
 
-    states = { standingState.name: standingState, runningLeftState.name: runningLeftState
-               , runningRightState.name: runningRightState, jumpingUpState.name: jumpingUpState
-               , jumpingLeftState.name: jumpingLeftState, jumpingRightState.name: jumpingRightState
-               , droppingArmsState.name: droppingArmsState, noArmsState.name: noArmsState
-               , growingState.name: growingState}
+    states = {standingState.name: standingState, runningLeftState.name: runningLeftState,
+              runningRightState.name: runningRightState, jumpingUpState.name: jumpingUpState,
+              jumpingLeftState.name: jumpingLeftState, jumpingRightState.name: jumpingRightState,
+              droppingArmsState.name: droppingArmsState, noArmsState.name: noArmsState,
+              growingState.name: growingState}
 
     jumpHeight = 8
     jumpSpeed = 2
     
-    def __init__(self, initPos, initStateName):
+    def __init__(self, init_pos, init_state_name):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.pos = initPos
-        self.state = initStateName
+        self.pos = init_pos
+        self.state = init_state_name
         self.imageIndex = 0
-        self.velocity = (0,0)
+        self.velocity = (0, 0)
+
+        self.image = None
+        self.rect = None
+        self.previousState = None
+        self.targetY = None
+        self.targetX = None
+
     def update(self):
         self.image = Jumpman.states[self.state].images[self.imageIndex]
         self.imageIndex = wrap_increment(self.imageIndex, len(Jumpman.states[self.state].images))
@@ -146,12 +158,12 @@ class Jumpman(pygame.sprite.Sprite):
             
         self.rect = self.image.get_rect()
         self.pos = (self.pos[0] + self.velocity[0], self.pos[1] + self.velocity[1])
-        if ((self.state == 'RunningLeft' and self.pos[0] <= self.targetX)
-            or (self.state == 'RunningRight' and self.pos[0] >= self.targetX)):
+        if ((self.state == 'RunningLeft' and self.pos[0] <= self.targetX) or
+                (self.state == 'RunningRight' and self.pos[0] >= self.targetX)):
             self.pos = (self.targetX, self.pos[1])
-            self.velocity = (0,0)
+            self.velocity = (0, 0)
             self.set_state('Standing')
-        elif (self.state in ['JumpingUp','JumpingLeft','JumpingRight']):
+        elif self.state in ['JumpingUp', 'JumpingLeft', 'JumpingRight']:
             if self.velocity[1] < 0 and self.pos[1] <= self.targetY:
                 self.pos = (self.pos[0], self.targetY)
                 self.velocity = (self.velocity[0], 0)
@@ -168,22 +180,24 @@ class Jumpman(pygame.sprite.Sprite):
             Jumpman.footStep.play()
             
         self.rect.center = self.pos
-    def set_state(self, newStateName):
+
+    def set_state(self, new_state_name):
         self.previousState = self.state
-        self.state = newStateName
+        self.state = new_state_name
         self.imageIndex = 0
-        if newStateName in ['JumpingUp','JumpingLeft','JumpingRight']:
+        if new_state_name in ['JumpingUp', 'JumpingLeft', 'JumpingRight']:
             self.targetY = self.pos[1] - Jumpman.jumpHeight 
             self.velocity = (self.velocity[0], -Jumpman.jumpSpeed)
             Jumpman.jump.play()
-        elif newStateName == 'DroppingArms':
+        elif new_state_name == 'DroppingArms':
             self.pos = (self.pos[0], self.pos[1] - 6)
-        elif newStateName == 'Growing':
+        elif new_state_name == 'Growing':
             Jumpman.grow.play()
-    def move_to_x(self, newX, speed):
-        if newX != self.pos[0]:
-            self.targetX = newX
-            if newX > self.pos[0]:
+
+    def move_to_x(self, new_x, speed):
+        if new_x != self.pos[0]:
+            self.targetX = new_x
+            if new_x > self.pos[0]:
                 self.set_state('RunningRight')
                 self.velocity = (speed, 0)
             else:
@@ -191,47 +205,52 @@ class Jumpman(pygame.sprite.Sprite):
                 self.velocity = (speed * -1, 0)
         else:
             self.set_state('Standing')
-            self.velocity = (0,0)
+            self.velocity = (0, 0)
                 
 
-"""the noarms letters sprite"""
+# the noarms letters sprite
 class Letter(pygame.sprite.Sprite):
     
     fall = pygame.mixer.Sound(os.path.join('namm', 'sounds', 'NoArmsIntro', 'FallingBomb.wav'))
     secure = pygame.mixer.Sound(os.path.join('namm', 'sounds', 'NoArmsIntro', 'LevelBonus.wav'))
     
-    def __init__(self, initPos, fileName, initColor):
+    def __init__(self, init_pos, file_name, init_color):
         pygame.sprite.Sprite.__init__(self, self.groups)    
-        self.image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', fileName))
+        self.image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', file_name))
         self.image = self.image.convert(8)
-        self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
+        self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
         self.fall = Letter.fall
         self.secure = Letter.secure
-        self.pos = initPos
-        self.color = initColor
+        self.pos = init_pos
+        self.color = init_color
         self.rect = self.image.get_rect()
-        self.velocity = (0,0)
+        self.velocity = (0, 0)
         self.state = 'Still'
+
+        self.targetX = None
+        self.targetY = None
+
     def update(self):
         self.pos = (self.pos[0] + self.velocity[0], self.pos[1] + self.velocity[1])
-        if ((self.state == 'MovingLeft' and self.pos[0] <= self.targetX)
-            or (self.state == 'MovingRight' and self.pos[0] >= self.targetX)):
+        if ((self.state == 'MovingLeft' and self.pos[0] <= self.targetX) or
+                (self.state == 'MovingRight' and self.pos[0] >= self.targetX)):
             self.pos = (self.targetX, self.pos[1])
-            self.velocity = (0,0)
+            self.velocity = (0, 0)
             self.state = 'Still'
-        if ((self.state == 'MovingUp' and self.pos[1] <= self.targetY)
-            or (self.state == 'MovingDown' and self.pos[1] >= self.targetY)):
+        if ((self.state == 'MovingUp' and self.pos[1] <= self.targetY) or
+                (self.state == 'MovingDown' and self.pos[1] >= self.targetY)):
             self.pos = (self.pos[0], self.targetY)
-            self.velocity = (0,0)
+            self.velocity = (0, 0)
             self.state = 'Still'
             self.secure.play()
 
         self.rect.center = self.pos
         self.image.set_palette_at(1, self.color)
-    def move_to_x(self, newX, speed):
-        if newX != self.pos[0]:
-            self.targetX = newX
-            if newX > self.pos[0]:
+
+    def move_to_x(self, new_x, speed):
+        if new_x != self.pos[0]:
+            self.targetX = new_x
+            if new_x > self.pos[0]:
                 self.state = 'MovingRight'
                 self.velocity = (speed, 0)
             else:
@@ -239,12 +258,13 @@ class Letter(pygame.sprite.Sprite):
                 self.velocity = (speed * -1, 0)
         else:
             self.state = 'Still'
-            self.velocity = (0,0)
-    def move_to_y(self, newY, speed):
+            self.velocity = (0, 0)
+
+    def move_to_y(self, new_y, speed):
         # assuming programmer will move to either x or y, not both!
-        if newY != self.pos[1]:
-            self.targetY = newY
-            if newY > self.pos[1]:
+        if new_y != self.pos[1]:
+            self.targetY = new_y
+            if new_y > self.pos[1]:
                 self.state = 'MovingDown'
                 self.velocity = (0, speed)
                 self.fall.play()
@@ -253,29 +273,32 @@ class Letter(pygame.sprite.Sprite):
                 self.velocity = (0, speed * -1)
         else:
             self.state = 'Still'
-            self.velocity = (0,0)
+            self.velocity = (0, 0)
 
-"""the title text sprite"""
+
+# the title text sprite
 class TitleText(pygame.sprite.Sprite):
-    def __init__(self, initPos, fileName):
+    def __init__(self, init_pos, file_name):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', fileName))
+        self.image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', file_name))
         self.image = self.image.convert()
-        self.pos = initPos
+        self.pos = init_pos
         self.rect = self.image.get_rect()
+
     def update(self):
-       self.rect.center = self.pos
+        self.rect.center = self.pos
 
 
-"""the opening screen sprites"""
+# the opening screen sprites
 class OpeningObjects(pygame.sprite.Sprite):
-    def __init__(self, initPos, fileName, colorKeyFlag):
+    def __init__(self, init_pos, file_name, color_key_flag):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', fileName))
+        self.image = pygame.image.load(os.path.join('namm', 'images', 'NoArmsIntro', file_name))
         self.image = self.image.convert()
-        if colorKeyFlag == 1:
-		self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
-        self.pos = initPos
+        if color_key_flag == 1:
+            self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
+        self.pos = init_pos
         self.rect = self.image.get_rect()
+
     def update(self):
-       self.rect.center = self.pos
+        self.rect.center = self.pos

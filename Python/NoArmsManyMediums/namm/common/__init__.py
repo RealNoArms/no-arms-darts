@@ -20,4 +20,4 @@ The No Arms Many Mediums Common Package
 """
 
 
-__all__ = ["utilities","menu"]
+__all__ = ["error", "logger", "menu", "utilities"]

@@ -1,9 +1,9 @@
 """
 
-The No Arms Many Mediums Common Views module
+Common Error Classes
 
 
-    Copyright (C) 2013  Tim Kracht <timkracht4@gmail.com>
+    Copyright (C) 2014-2015  Tim Kracht <timkracht4@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,24 @@ The No Arms Many Mediums Common Views module
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-""" The View base class """
-class View:
-    def __init__(self):
-        self.name = "Namm View"
+
+# Base Error
+class Error(Exception):
+
+    def __init__(self, msg=None, obj=None):
+        self._msg = msg
+        self._obj = obj
+        self._rep = "Error"
+
+    def __str__(self):
+        rep = self._rep
+        if self._msg is not None:
+            rep += ": " + self._msg
+
+        rep += ": obj = "
+
+        if self._obj is not None:
+            rep += self._obj
+        else:
+            rep += "{None}"
+        return rep
